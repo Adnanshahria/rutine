@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Last Fight</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* gray-900 */
+            color: #d1d5db; /* gray-300 */
+        }
+        
+        /* Custom scrollbar for aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        
+        /* Mobile responsive table */
+        @media (max-width: 1024px) {
+            table thead {
+                display: none;
+            }
+            table tr {
+                display: block;
+                margin-bottom: 1.5rem;
+                border: 1px solid #374151; /* gray-700 */
+                border-radius: 0.5rem;
+                overflow: hidden;
+            }
+            table td {
+                display: block;
+                text-align: right;
+                padding-left: 50%;
+                position: relative;
+                border-bottom: 1px solid #374151; /* gray-700 */
+            }
+            table td:last-child {
+                border-bottom: 0;
+            }
+            table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                padding-left: 0.5rem;
+                font-weight: 600;
+                color: #9ca3af; /* gray-400 */
+                text-align: left;
+            }
+        }
+        
+        /* Progress Box */
+        .progress-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            min-width: 50px;
+            max-width: 50px;
+            height: 50px;
+            flex-shrink: 0; 
+            border: 2px solid #374151; /* gray-700 */
+            border-radius: 0.375rem; /* rounded-md */
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem; /* text-sm */
+            transition: all 0.2s ease-in-out;
+            user-select: none;
+            box-sizing: border-box; 
+            text-align: center; 
+        }
+        
+        /* 6-Step Progress Colors */
+        .progress-0 { background-color: #374151; color: #d1d5db; } /* gray-700 */
+        .progress-20 { background-color: #b91c1c; color: white; border-color: #fca5a5; } /* red-700 */
+        .progress-40 { background-color: #c2410c; color: white; border-color: #fdba74; } /* orange-700 */
+        .progress-60 { background-color: #a16207; color: white; border-color: #fde047; } /* yellow-700 */
+        .progress-80 { background-color: #15803d; color: white; border-color: #86efac; } /* green-700 */
+        .progress-100 { background-color: #1d4ed8; color: white; border-color: #93c5fd; } /* blue-700 */
+
+        /* Edit/Note Icon */
+        .edit-icon {
+            cursor: pointer;
+            flex-shrink: 0;
+            color: #6b7280; /* gray-500 */
+            transition: color 0.2s;
+        }
+        .edit-icon:hover {
+            color: #ffffff;
+        }
+        .edit-icon.has-note {
+            color: #facc15; /* yellow-400 */
+        }
+        .edit-icon.has-note:hover {
+            color: #fde047; /* yellow-300 */
+        }
+        
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+        }
+        
+        /* Toast Notification */
+        #sync-toast {
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #sync-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Editable Date Cell */
+        [contenteditable] {
+            outline: none;
+            background-color: #1f2937; /* gray-800 */
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            border: 2px solid transparent;
+            transition: border-color 0.3s ease; /* For feedback */
+        }
+        [contenteditable]:focus {
+            border-color: #3b82f6; /* blue-500 */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Delete Row Button */
+        .delete-row-btn {
+            position: absolute;
+            top: 0.5rem; 
+            right: 0.5rem; 
+            padding: 0.25rem; 
+            color: #9ca3af; /* gray-400 */
+            border-radius: 9999px; /* rounded-full */
+            transition: all 0.2s ease;
+            opacity: 0.3;
+        }
+        tr:hover .delete-row-btn {
+            opacity: 1; 
+        }
+        .delete-row-btn:hover {
+            color: #f87171; /* red-400 */
+            background-color: #374151; /* gray-700 */
+        }
+        
+        /* NEW: Drag and Drop Styles */
+        .topic-item {
+            cursor: grab;
+        }
+        .topic-item.dragging {
+            opacity: 0.5;
+            background-color: #3b82f6_30; /* blue-500/30 */
+        }
+        td.drag-over {
+            background-color: #3b82f6_20; /* blue-500/20 */
+            border: 2px dashed #3b82f6;
+        }
+        
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="h-full p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-6">
+            <h1 class="text-4xl font-bold text-white mb-2">Last Fight</h1>
+            <p class="text-lg text-gray-400">Your interactive study dashboard, powered by Firebase.</p>
+        </header>
+        
+        <!-- Loading State -->
+        <div id="loading-state" class="flex flex-col items-center justify-center h-64 text-gray-400">
+            <div class="spinner" style="width: 40px; height: 40px; border-width: 4px;"></div>
+            <p class="text-lg mt-4 font-semibold">Loading Dashboard...</p>
+            <p class="text-sm">Syncing with Firebase...</p>
+        </div>
+
+        <!-- Content (Hidden until loaded) -->
+        <main id="content-wrapper" class="hidden">
+
+            <!-- Countdown Timer -->
+            <section id="countdown-card" class="mb-8 p-6 bg-gray-800 rounded-lg border border-gray-700 shadow-lg">
+                <h2 class="text-2xl font-semibold text-white mb-4 text-center">Countdown to 12th December</h2>
+                <div class="flex justify-center gap-4 md:gap-8 text-white text-center">
+                    <div>
+                        <div id="countdown-days" class="text-4xl md:text-6xl font-bold text-indigo-300">00</div>
+                        <div class="text-sm uppercase text-gray-400">Days</div>
+                    </div>
+                    <div>
+                        <div id="countdown-hours" class="text-4xl md:text-6xl font-bold text-indigo-300">00</div>
+                        <div class="text-sm uppercase text-gray-400">Hours</div>
+                    </div>
+                    <div>
+                        <div id="countdown-minutes" class="text-4xl md:text-6xl font-bold text-indigo-300">00</div>
+                        <div class="text-sm uppercase text-gray-400">Minutes</div>
+                    </div>
+                    <div>
+                        <div id="countdown-seconds" class="text-4xl md:text-6xl font-bold text-indigo-300">00</div>
+                        <div class="text-sm uppercase text-gray-400">Seconds</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Progress Bars -->
+            <section class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-300 mb-2">Overall Progress (Table 1)</h3>
+                <div class="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+                    <div id="overall-progress-bar" class="bg-green-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                    <span id="overall-progress-text" class="absolute inset-0 w-full h-full flex items-center justify-center text-xs font-semibold text-white mix-blend-difference">0%</span>
+                </div>
+            </section>
+            <section class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-300 mb-2">Daily Progress (Table 2)</h3>
+                <div class="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+                    <div id="t2-overall-progress-bar" class="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+                    <span id="t2-overall-progress-text" class="absolute inset-0 w-full h-full flex items-center justify-center text-xs font-semibold text-white mix-blend-difference">0%</span>
+                </div>
+            </section>
+
+            <!-- Table 1: Subject-wise Topics -->
+            <section class="mb-8">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                    <h2 class="text-2xl font-semibold text-white">Table 1: Subject-wise Topics</h2>
+                    <span id="t1_task_counter" class="bg-green-500/20 text-green-300 text-sm font-semibold px-3 py-1 rounded-full opacity-0 transition-opacity">
+                        0 / 0 Done
+                    </span>
+                </div>
+                <div class="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
+                    <table id="table1" class="w-full min-w-[1000px] table-fixed">
+                        <thead class="bg-gray-700/50">
+                            <tr class="divide-x divide-gray-700">
+                                <th class="w-1/6 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">Date</th>
+                                <th class="w-1/6 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Phy</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_phy" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/6 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Chem</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_chem" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/6 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Bio</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_bio" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/6 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>GK</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_gk" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/6 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>English</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_english" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table1-body" class="divide-y divide-gray-700">
+                            <!-- Rows are populated by populateTables() -->
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">28/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Phy"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Chem"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Bio"></td>
+                                <td class="p-4 align-top space-y-3" data-label="GK"></td>
+                                <td class="p-4 align-top space-y-3" data-label="English"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">31/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Phy"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Chem"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Bio"></td>
+                                <td class="p-4 align-top space-y-3" data-label="GK"></td>
+                                <td class="p-4 align-top space-y-3" data-label="English"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">02/11/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Phy"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Chem"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Bio"></td>
+                                <td class="p-4 align-top space-y-3" data-label="GK"></td>
+                                <td class="p-4 align-top space-y-3" data-label="English"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Add New Row Button -->
+                <button id="add-row-t1" class="add-row-btn mt-4 w-full p-3 text-center text-blue-400 font-semibold bg-gray-800 border-2 border-dashed border-gray-700 rounded-lg hover:bg-gray-700/70 hover:border-blue-500 transition-all">
+                    + Add New Row
+                </button>
+            </section>
+
+            <!-- Table 2: Daily Session Plan -->
+            <section class="mb-8">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                    <h2 class="text-2xl font-semibold text-white">Table 2: Daily Session Plan</h2>
+                    <span id="t2_task_counter" class="bg-green-500/20 text-green-300 text-sm font-semibold px-3 py-1 rounded-full opacity-0 transition-opacity">
+                        0 / 0 Done
+                    </span>
+                </div>
+                <div class="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700">
+                    <table id="table2" class="w-full min-w-[1000px] table-fixed">
+                        <thead class="bg-gray-700/50">
+                            <tr class="divide-x divide-gray-700">
+                                <th class="w-1/5 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">Date</th>
+                                <th class="w-1/5 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Morning Session</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_morning" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/5 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Noon Session</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_noon" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/5 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Night Session</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_night" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="w-1/5 p-4 text-left text-sm font-semibold text-gray-300 uppercase tracking-wider">
+                                    <div class="flex flex-col">
+                                        <span>Secret Files</span>
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_secret" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="table2-body" class="divide-y divide-gray-700">
+                            <!-- Rows are populated by populateTables() -->
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">26/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">27/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">28/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">29/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">30/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">31/10/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date">
+                                    <div class="font-semibold">01/11/2025</div>
+                                </td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                            <tr class="divide-x divide-gray-700">
+                                <td class="p-4 align-top" data-label="Date"><div class="font-semibold">02/11/2025</div></td>
+                                <td class="p-4 align-top space-y-3" data-label="Morning Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Noon Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Night Session"></td>
+                                <td class="p-4 align-top space-y-3" data-label="Secret Files"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Add New Row Button -->
+                <button id="add-row-t2" class="add-row-btn mt-4 w-full p-3 text-center text-blue-400 font-semibold bg-gray-800 border-2 border-dashed border-gray-700 rounded-lg hover:bg-gray-700/70 hover:border-blue-500 transition-all">
+                    + Add New Row
+                </button>
+            </section>
+        
+        </main>
+    </div>
+    
+    <!-- Sync Toast Notification -->
+    <div id="sync-toast" class="">
+        <div id="toast-spinner" class="spinner mr-2 hidden"></div>
+        <span id="toast-text"></span>
+    </div>
+    
+    <!-- Edit/Note Modal -->
+    <div id="edit-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-md border border-gray-700">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">Edit Topic</h3>
+                
+                <div class="mb-4">
+                    <label for="modal-topic-name" class="block text-sm font-medium text-gray-400 mb-1">Topic Name</label>
+                    <input type="text" id="modal-topic-name" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="mb-6">
+                    <label for="modal-topic-note" class="block text-sm font-medium text-gray-400 mb-1">Notes</label>
+                    <textarea id="modal-topic-note" rows="4" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <button id="modal-delete-button" type="button" class="px-4 py-2 rounded-md text-sm font-medium text-red-400 bg-red-900/50 hover:bg-red-900/80 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                        Delete Topic
+                    </button>
+                    <div>
+                        <button id="modal-cancel-button" type="button" class="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-800 mr-3">
+                            Cancel
+                        </button>
+                        <button id="modal-save-button" type="button" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW (Bug #9): Add Topic Modal -->
+    <div id="add-topic-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-md border border-gray-700">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">Add New Topic</h3>
+                
+                <div class="mb-4">
+                    <label for="modal-add-topic-name" class="block text-sm font-medium text-gray-400 mb-1">New Topic Name</label>
+                    <input type="text" id="modal-add-topic-name" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex justify-end items-center">
+                    <button id="modal-add-cancel-button" type="button" class="px-4 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-800 mr-3">
+                        Cancel
+                    </button>
+                    <button id="modal-add-save-button" type="button" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800">
+                        Add Topic
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            onSnapshot,
+            enableIndexedDbPersistence,
+            CACHE_SIZE_UNLIMITED
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration ---
+        let firebaseConfig;
+        if (typeof __firebase_config !== 'undefined') {
+            try {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } catch (e) {
+                console.error("Failed to parse injected Firebase config:", e);
+            }
+        }
+        
+        if (!firebaseConfig) {
+            firebaseConfig = {
+                apiKey: "AIzaSyDTLhIkrW9qk6KPT_gTDibIiJeVwWYTowk",
+                authDomain: "my-study-dashboard.firebaseapp.com",
+                databaseURL: "https://my-study-dashboard-default-rtdb.firebaseio.com",
+                projectId: "my-study-dashboard",
+                storageBucket: "my-study-dashboard.firebasestorage.app",
+                messagingSenderId: "66307909031",
+                appId: "1:66307909031:web:a077b8cf1a046069f80282",
+                measurementId: "G-936WFWT6DY"
+            };
+        }
+
+        // --- App Initialization ---
+        let app, auth, db;
+        let initError = null;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            enableIndexedDbPersistence(db, { cacheSizeBytes: CACHE_SIZE_UNLIMITED })
+                .catch((err) => {
+                    console.warn("Firebase offline persistence failed:", err.code);
+                    if (err.code == 'failed-precondition') {
+                        console.warn("Multiple tabs open, offline persistence will be disabled.");
+                    }
+                });
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            initError = error;
+        }
+
+        // --- Global State ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        let userId = null;
+        let dbDocRef = null;
+        let unsubscribeSnapshot = null;
+        let saveTimeout = null;
+        let countdownInterval = null;
+        let isFirstLoad = true; 
+        let pendingChanges = false; // FIX (Bug #6)
+        
+        const appData = {
+            completedTopics: {}
+        };
+        
+        const tableData = {
+            table1: {
+                "28/10/2025": {
+                    Phy: ["Motion", "Work", "Gas"],
+                    Chem: ["Organic (2.0-2.11.2)"],
+                    Bio: ["Tissue", "Bryophyta", "JiboProjukti"],
+                    GK: [],
+                    English: ["Spelling", "Syn-Ant + Translation", "Appropriate Prep"]
+                },
+                "31/10/2025": {
+                    Phy: ["Voutojogot", "Gravity", "Jamitik", "Semiconductor", "Stir Torith", "Cholotorith"],
+                    Chem: ["Chemical Change", "Porimangoto", "Poribesh", "Orthonoitik"],
+                    Bio: ["Somonnoy full", "Soshon", "nognobiji"],
+                    GK: [],
+                    English: []
+                },
+                "02/11/2025": {
+                    Phy: ["Optics", "Modern", "Neuclear"],
+                    Chem: ["Organic 2.1.3--last"],
+                    Bio: ["Colon", "Dharabahikota"],
+                    GK: [],
+                    English: ["Group Verb", "Proverb", "Idioms and Phrases"]
+                }
+            },
+            table2: {
+                "26/10/2025": {
+                    "Morning Session": ["Tissue", "Bryophyta", "JiboProjukti"],
+                    "Noon Session": ["গতিবিদ্যা"],
+                    "Night Session": ["Organic (C+Meditrics)"],
+                    "Secret Files": ["Tissue", "Bryophta", "JiboProjukti", "Gotibidda"]
+                },
+                "27/10/2025": {
+                    "Morning Session": ["Gas", "Work Revision", "Secret Files"],
+                    "Noon Session": ["Organic All Left Classes"],
+                    "Night Session": ["Spelling (All)"],
+                    "Secret Files": []
+                },
+                "28/10/2025": {
+                    "Morning Session": ["Organic for Weekly."],
+                    "Noon Session": ["Weekly Session"],
+                    "Night Session": ["Gravity", "Cholotorith"],
+                    "Secret Files": ["Gravity", "Cholotorith"]
+                },
+                "29/10/2025": {
+                    "Morning Session": ["পরিমাণগত রসায়ন", "পরিবেশ রসায়ন"],
+                    "Noon Session": ["অর্থনৈতিক রসায়ন – Class+Book"],
+                    "Night Session": ["অর্থনৈতিক রসায়ন-MQB"],
+                    "Secret Files": ["অর্থনৈতিক রসায়ন", "পরিমাণগত রসায়ন", "পরিবেশ রসায়ন"]
+                },
+                "30/10/2025": {
+                    "Morning Session": ["Somonnoy full"],
+                    "Noon Session": [],
+                    "Night Session": ["Somonnoy MQB", "Monthly English"],
+                    "Secret Files": ["Somonnoy, left exams"]
+                },
+                "31/10/2025": {
+                    "Morning Session": ["revision"],
+                    "Noon Session": ["exam"],
+                    "Night Session": ["Neuclear---mqb", "Modern"],
+                    "Secret Files": ["Neuclear Phy", "Modern"]
+                },
+                "01/11/2025": { // Corrected from 01/10
+                    "Morning Session": ["Colon"],
+                    "Noon Session": ["Dharabahikota"],
+                    "Night Session": ["Mixed"],
+                    "Secret Files": ["Colon", "dharabahikota"]
+                },
+                "02/11/2025": {
+                    "Morning Session": ["Optics(Class)"],
+                    "Noon Session": ["+MQB"],
+                    "Night Session": ["Exam", "Remake rutine"], // Split topic
+                    "Secret Files": []
+                }
+            }
+        };
+
+        // --- DOM Elements ---
+        const loadingEl = document.getElementById('loading-state');
+        const contentEl = document.getElementById('content-wrapper');
+        const modalEl = document.getElementById('edit-modal');
+        const modalTopicName = document.getElementById('modal-topic-name');
+        const modalTopicNote = document.getElementById('modal-topic-note');
+        const addTopicModalEl = document.getElementById('add-topic-modal'); // NEW (Bug #9)
+        const addTopicModalName = document.getElementById('modal-add-topic-name'); // NEW (Bug #9)
+        
+        const progressSteps = [0, 20, 40, 60, 80, 100];
+        
+        // --- Core Functions ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (initError) {
+                loadingEl.innerHTML = `<p class="text-red-400">Error: Firebase failed to initialize. Check console.</p>`;
+                return;
+            }
+            
+            authenticateUser();
+            startCountdown();
+            
+            // --- Event Delegation ---
+            document.addEventListener('click', (e) => {
+                const target = e.target;
+                
+                // Progress box click
+                if (target.classList.contains('progress-box')) {
+                    handleProgressClick(e);
+                    return;
+                }
+                
+                // Edit icon click
+                const editIcon = target.closest('.edit-icon');
+                if (editIcon) {
+                    handleEditClick(editIcon);
+                    return;
+                }
+
+                // Add Topic click
+                if (target.classList.contains('add-topic-btn')) {
+                    handleAddTopicClick(e);
+                    return;
+                }
+                
+                // Add Row Click
+                const addRowBtn = target.closest('.add-row-btn');
+                if (addRowBtn) {
+                    addNewRow(addRowBtn.id === 'add-row-t1' ? 'table1' : 'table2');
+                    return;
+                }
+                
+                // Edit Modal buttons
+                if (target.id === 'modal-save-button') {
+                    handleModalSave();
+                    return;
+                }
+                if (target.id === 'modal-cancel-button') {
+                    modalEl.classList.add('hidden');
+                    return;
+                }
+                if (target.id === 'modal-delete-button') {
+                    handleModalDelete();
+                    return;
+                }
+                
+                // NEW (Bug #9): Add Topic Modal buttons
+                if (target.id === 'modal-add-save-button') {
+                    handleModalAddSave();
+                    return;
+                }
+                if (target.id === 'modal-add-cancel-button') {
+                    addTopicModalEl.classList.add('hidden');
+                    return;
+                }
+                
+                // Modal backdrop click
+                if (target.id === 'edit-modal' || target.id === 'add-topic-modal') {
+                    target.classList.add('hidden');
+                    return;
+                }
+            });
+            
+            // --- FIX (Bug #4): Modal Keyboard Accessibility ---
+            document.addEventListener('keydown', (e) => {
+                if (!modalEl.classList.contains('hidden')) {
+                    if (e.key === 'Escape') {
+                        modalEl.classList.add('hidden');
+                    } else if (e.key === 'Enter' && e.ctrlKey && e.target.tagName !== 'TEXTAREA') {
+                        handleModalSave();
+                    }
+                }
+                if (!addTopicModalEl.classList.contains('hidden')) {
+                     if (e.key === 'Escape') {
+                        addTopicModalEl.classList.add('hidden');
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault(); // Prevent form submission
+                        handleModalAddSave();
+                    }
+                }
+            });
+            
+            // --- FIX (Bug #8): Progress Reversal ---
+            document.addEventListener('contextmenu', (e) => {
+                const box = e.target.closest('.progress-box');
+                if (box) {
+                    e.preventDefault(); // Prevent browser context menu
+                    handleReverseProgressClick(box);
+                }
+            });
+            
+            // --- NEW: Drag and Drop Listeners ---
+            let draggedElement = null;
+            
+            document.addEventListener('dragstart', (e) => {
+                const item = e.target.closest('.topic-item');
+                if (item) {
+                    draggedElement = item;
+                    const topicId = item.querySelector('.progress-box').dataset.topicId;
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', topicId);
+                    // Timeout to allow DOM to update before applying class
+                    setTimeout(() => item.classList.add('dragging'), 0);
+                }
+            });
+            
+            document.addEventListener('dragend', (e) => {
+                if (draggedElement) {
+                    draggedElement.classList.remove('dragging');
+                    draggedElement = null;
+                }
+            });
+
+            document.addEventListener('dragover', (e) => {
+                const cell = e.target.closest('td[data-label]');
+                if (cell && draggedElement) {
+                    e.preventDefault(); 
+                    e.dataTransfer.dropEffect = 'move';
+                    cell.classList.add('drag-over');
+                }
+            });
+            
+            document.addEventListener('dragleave', (e) => {
+                const cell = e.target.closest('td[data-label]');
+                if (cell) {
+                    cell.classList.remove('drag-over');
+                }
+            });
+
+            document.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const toCell = e.target.closest('td[data-label]');
+                if (!toCell || !draggedElement) return;
+
+                toCell.classList.remove('drag-over');
+                handleDragDrop(draggedElement, toCell);
+                draggedElement = null;
+            });
+
+        });
+        
+        function authenticateUser() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    const docPath = `artifacts/${appId}/users/${userId}/studyProgress/data`;
+                    dbDocRef = doc(db, docPath);
+                    loadDataFromFirestore();
+                } else {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                        loadingEl.innerHTML = `<p class="text-red-400">Error: Authentication failed. Please refresh.</p>`;
+                    }
+                }
+            });
+        }
+        
+        function loadDataFromFirestore() {
+            if (!dbDocRef) return;
+            showToast('syncing');
+            if (unsubscribeSnapshot) unsubscribeSnapshot(); 
+            
+            unsubscribeSnapshot = onSnapshot(dbDocRef, (doc) => {
+                appData.completedTopics = doc.exists() ? (doc.data().completedTopics || {}) : {};
+                renderData();
+                showToast(doc.metadata.fromCache ? "cached" : "synced");
+            }, (error) => {
+                console.error("Firestore snapshot error:", error);
+                loadingEl.innerHTML = `<p class="text-red-400">Error: Failed to load data. Check console.</p>`;
+                showToast('error');
+            });
+        }
+        
+        function renderData() {
+            if (isFirstLoad) {
+                populateTables();
+                isFirstLoad = false;
+            } else {
+                updateExistingTopics();
+            }
+            updateAllProgressBars();
+            loadingEl.classList.add('hidden');
+            contentEl.classList.remove('hidden');
+        }
+
+        function populateTables() {
+            ['table1', 'table2'].forEach(tableId => {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                
+                const data = tableData[tableId];
+                
+                table.querySelectorAll('tbody tr').forEach(row => {
+                    const dateCell = row.cells[0]?.querySelector('div');
+                    if (!dateCell) return; 
+                    
+                    const dateCellElement = row.cells[0];
+                    dateCellElement.style.position = 'relative'; 
+                    const deleteBtn = createDeleteRowButton(row);
+                    dateCellElement.appendChild(deleteBtn);
+                    
+                    const date = dateCell.textContent.trim();
+                    const dateData = data[date]; 
+                    
+                    Array.from(row.cells).slice(1).forEach(cell => {
+                        const colName = cell.dataset.label;
+                        if (!colName) return; 
+                        
+                        cell.innerHTML = ''; 
+                        
+                        if (dateData) {
+                            const topics = dateData[colName] || [];
+                            topics.forEach(topicName => {
+                                const topicId = createTopicId(tableId, date, colName, topicName);
+                                const topicEl = createTopicElement(topicId, topicName);
+                                cell.appendChild(topicEl);
+                            });
+                        }
+                        
+                        const addBtn = document.createElement('button');
+                        addBtn.className = 'add-topic-btn w-full text-left text-sm text-gray-500 hover:text-blue-400 p-2 border-2 border-dashed border-gray-700 rounded-md hover:border-blue-500 transition-colors';
+                        addBtn.textContent = '+ Add Topic';
+                        cell.appendChild(addBtn);
+                    });
+                });
+            });
+        }
+        
+        function updateExistingTopics() {
+            document.querySelectorAll('.progress-box').forEach(box => {
+                const topicId = box.dataset.topicId;
+                const topicData = appData.completedTopics[topicId];
+                
+                if (topicData) {
+                    const progress = topicData.progress || 0;
+                    box.className = `progress-box progress-${progress}`;
+                    box.textContent = `${progress}%`;
+                    
+                    const item = box.closest('.topic-item');
+                    if (!item) return;
+
+                    const nameEl = item.querySelector('.topic-name');
+                    if (nameEl && topicData.name) {
+                        nameEl.textContent = topicData.name;
+                    }
+                    
+                    const iconEl = item.querySelector('.edit-icon');
+                    if (iconEl) {
+                        iconEl.classList.toggle('has-note', !!topicData.note);
+                    }
+                }
+            });
+        }
+        
+        function createTopicElement(topicId, defaultName) {
+            const topicData = appData.completedTopics[topicId] || {};
+            const progress = topicData.progress || 0;
+            const note = topicData.note || '';
+            const name = topicData.name || defaultName;
+            
+            const item = document.createElement('div');
+            item.className = 'topic-item flex items-center gap-2';
+            item.setAttribute('draggable', 'true'); // NEW: For Drag/Drop
+            
+            const box = document.createElement('div');
+            box.className = `progress-box progress-${progress}`;
+            box.textContent = `${progress}%`;
+            box.dataset.topicId = topicId;
+            
+            const nameEl = document.createElement('span');
+            nameEl.className = 'topic-name flex-1 min-w-0 break-words';
+            nameEl.textContent = name;
+            
+            const icon = document.createElement('span');
+            icon.className = 'edit-icon p-1';
+            icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+            if (note) icon.classList.add('has-note');
+            icon.dataset.topicId = topicId; 
+            
+            item.appendChild(box);
+            item.appendChild(nameEl);
+            item.appendChild(icon);
+            
+            return item;
+        }
+
+        /**
+         * --- FIX (Bug #3): Improved Topic ID Sanitizer ---
+         */
+        function createTopicId(tableId, date, colName, topicName) {
+            const t = tableId.replace('table', 't');
+            const d = date.replace(/\//g, '-');
+            const c = colName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            // "Task 1" -> "task-1", "Task-1" -> "task-1", "Task_1" -> "task1"
+            const n = topicName.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9\-]/g, '');
+            return `${t}_${d}_${c}_${n}`;
+        }
+        
+        function createDeleteRowButton(rowElement) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-row-btn'; 
+            deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+            deleteBtn.title = 'Delete Row';
+            
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete this entire row? This cannot be undone.')) {
+                    rowElement.querySelectorAll('.progress-box').forEach(box => {
+                        delete appData.completedTopics[box.dataset.topicId];
+                    });
+                    rowElement.remove();
+                    saveDataToFirestore();
+                    updateAllProgressBars(); 
+                }
+            });
+            return deleteBtn;
+        }
+        
+        function addNewRow(tableId) {
+            const tableBody = document.getElementById(`${tableId}-body`);
+            const table = document.getElementById(tableId);
+            if (!tableBody || !table) return;
+
+            const newRow = document.createElement('tr');
+            newRow.className = 'divide-x divide-gray-700';
+
+            const headers = Array.from(table.querySelectorAll('thead th'));
+            
+            headers.forEach((header, index) => {
+                const cell = document.createElement('td');
+                cell.className = 'p-4 align-top space-y-3';
+                const colName = header.textContent.trim().split('\n')[0]; 
+                cell.dataset.label = colName;
+                
+                if (index === 0) {
+                    cell.style.position = 'relative'; 
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'font-semibold';
+                    dateDiv.setAttribute('contenteditable', 'true');
+                    dateDiv.textContent = 'New Date'; 
+                    cell.appendChild(dateDiv);
+                    
+                    // --- FIX (Bug #2): Stronger Date Validation ---
+                    dateDiv.addEventListener('blur', (e) => {
+                        const dateText = e.target.textContent.trim();
+                        const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+                        
+                        if (!dateRegex.test(dateText)) {
+                            alert('Please enter a valid date in DD/MM/YYYY format');
+                            e.target.textContent = 'New Date';
+                            e.target.focus();
+                            return;
+                        }
+
+                        const [day, month, year] = dateText.split('/').map(Number);
+                        const testDate = new Date(year, month - 1, day);
+                        if (testDate.getDate() !== day || testDate.getMonth() !== month - 1 || testDate.getFullYear() !== year) {
+                            alert('Invalid date! Please check the day/month/year values.');
+                            e.target.textContent = 'New Date';
+                            e.target.focus();
+                            return;
+                        }
+                        // --- End Fix (Bug #2) ---
+                        
+                        const table = e.target.closest('table');
+                        const allDateCells = table.querySelectorAll('tbody tr td:first-child div');
+                        const existingDates = Array.from(allDateCells)
+                            .filter(cell => cell !== e.target)
+                            .map(cell => cell.textContent.trim());
+                        
+                        if (existingDates.includes(dateText)) {
+                            alert('A row with this date already exists!');
+                            e.target.textContent = 'New Date'; 
+                            e.target.focus();
+                            return;
+                        }
+
+                        handleDateChange(e.target);
+                        
+                        e.target.style.borderColor = '#10b981'; // green
+                        setTimeout(() => e.target.style.borderColor = 'transparent', 1000);
+                    });
+                    
+                    const deleteBtn = createDeleteRowButton(newRow);
+                    cell.appendChild(deleteBtn);
+                    
+                } else {
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'add-topic-btn w-full text-left text-sm text-gray-500 hover:text-blue-400 p-2 border-2 border-dashed border-gray-700 rounded-md hover:border-blue-500 transition-colors';
+                    addBtn.textContent = '+ Add Topic';
+                    cell.appendChild(addBtn);
+                }
+                newRow.appendChild(cell);
+            });
+            
+            tableBody.appendChild(newRow);
+            
+            const newDateCell = newRow.cells[0]?.querySelector('div');
+            if(newDateCell) {
+                newDateCell.focus();
+                const range = document.createRange();
+                range.selectNodeContents(newDateCell);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        }
+        
+        function handleDateChange(dateDiv) {
+            const row = dateDiv.closest('tr');
+            const table = row.closest('table');
+            const newDate = dateDiv.textContent.trim().replace(/\//g, '-');
+            if (!row || !table || !newDate) return;
+
+            row.querySelectorAll('.progress-box').forEach(box => {
+                const topicId = box.dataset.topicId;
+                const oldData = appData.completedTopics[topicId];
+                if (!oldData) return;
+                
+                const parts = topicId.split('_');
+                if (parts.length < 4) return;
+                
+                const tablePart = parts[0];     
+                const colPart = parts[2];     
+                const topicPart = parts.slice(3).join('_'); 
+                
+                const newTopicId = `${tablePart}_${newDate}_${colPart}_${topicPart}`;
+
+                if (newTopicId !== topicId) {
+                    delete appData.completedTopics[topicId];
+                    appData.completedTopics[newTopicId] = oldData;
+                    box.dataset.topicId = newTopicId;
+                    const icon = box.closest('.topic-item').querySelector('.edit-icon');
+                    if (icon) icon.dataset.topicId = newTopicId;
+                }
+            });
+            saveDataToFirestore();
+        }
+        
+        /**
+         * --- FIX (Bug #6): Improved Save Logic ---
+         */
+        function saveDataToFirestore() {
+            if (!dbDocRef) return;
+            
+            pendingChanges = true;
+            if (saveTimeout) clearTimeout(saveTimeout);
+            
+            saveTimeout = setTimeout(async () => {
+                if (!pendingChanges) return;
+                pendingChanges = false;
+                
+                try {
+                    showToast('syncing');
+                    await setDoc(dbDocRef, { 
+                        completedTopics: appData.completedTopics 
+                    }, { merge: true });
+                    // showToast('synced') is handled by onSnapshot
+                } catch (error) {
+                    console.error("Error saving to Firestore:", error);
+                    showToast('error');
+                    pendingChanges = true; // Retry on error?
+                }
+            }, 1000); 
+        }
+        
+        // --- Event Handlers (Called by Delegation) ---
+        
+        function handleProgressClick(event) {
+            const box = event.target;
+            const topicId = box.dataset.topicId;
+            const currentData = appData.completedTopics[topicId] || { progress: 0 };
+            const currentProgress = currentData.progress || 0;
+            
+            const currentIndex = progressSteps.indexOf(currentProgress);
+            const nextIndex = (currentIndex + 1) % progressSteps.length;
+            const nextProgress = progressSteps[nextIndex];
+            
+            appData.completedTopics[topicId] = { ...currentData, progress: nextProgress };
+            
+            box.className = `progress-box progress-${nextProgress}`;
+            box.textContent = `${nextProgress}%`;
+            
+            saveDataToFirestore();
+            updateProgressBarForCell(box.closest('td'));
+        }
+
+        /**
+         * --- FIX (Bug #8): Handle Right-Click for Progress Reversal ---
+         */
+        function handleReverseProgressClick(box) {
+            const topicId = box.dataset.topicId;
+            const currentData = appData.completedTopics[topicId] || { progress: 0 };
+            const currentProgress = currentData.progress || 0;
+            
+            const currentIndex = progressSteps.indexOf(currentProgress);
+            const prevIndex = (currentIndex - 1 + progressSteps.length) % progressSteps.length;
+            const prevProgress = progressSteps[prevIndex];
+            
+            appData.completedTopics[topicId] = { ...currentData, progress: prevProgress };
+            
+            box.className = `progress-box progress-${prevProgress}`;
+            box.textContent = `${prevProgress}%`;
+            
+            saveDataToFirestore();
+            updateProgressBarForCell(box.closest('td'));
+        }
+        
+        /**
+         * --- FIX (Bug #9): Use Modal for Adding Topics ---
+         */
+        function handleAddTopicClick(event) {
+            const button = event.target;
+            const cell = button.closest('td');
+            const row = cell.closest('tr');
+            
+            const dateCell = row.cells[0]?.querySelector('div');
+            if (!dateCell) return;
+            
+            const date = dateCell.textContent.trim();
+            if (date === 'New Date') {
+                alert('Please set a valid date for this row first.');
+                dateCell.focus();
+                return;
+            }
+            
+            // Store context on the modal itself
+            addTopicModalEl.dataset.tableId = cell.closest('table').id;
+            addTopicModalEl.dataset.colName = cell.dataset.label;
+            addTopicModalEl.dataset.date = date;
+            
+            addTopicModalName.value = '';
+            addTopicModalEl.classList.remove('hidden');
+            addTopicModalName.focus();
+        }
+        
+        /**
+         * --- NEW (Bug #9): Handler for Add Topic Modal Save ---
+         */
+        function handleModalAddSave() {
+            const tableId = addTopicModalEl.dataset.tableId;
+            const colName = addTopicModalEl.dataset.colName;
+            const date = addTopicModalEl.dataset.date;
+            const newTopicName = addTopicModalName.value.trim();
+
+            if (!newTopicName) {
+                alert("Topic name cannot be empty.");
+                return;
+            }
+            if (!tableId || !colName || !date) {
+                console.error("Modal context is missing.");
+                return;
+            }
+
+            const topicId = createTopicId(tableId, date, colName, newTopicName);
+            
+            if (appData.completedTopics[topicId] || document.querySelector(`[data-topic-id="${topicId}"]`)) {
+                alert("A topic with this name already exists in this cell.");
+                return;
+            }
+
+            // Find the correct cell
+            const table = document.getElementById(tableId);
+            let targetCell = null;
+            const rows = table.querySelectorAll('tbody tr');
+            for (const row of rows) {
+                const dateDiv = row.cells[0]?.querySelector('div');
+                if (dateDiv && dateDiv.textContent.trim() === date) {
+                    targetCell = Array.from(row.cells).find(cell => cell.dataset.label === colName);
+                    break;
+                }
+            }
+
+            if (!targetCell) {
+                console.error("Could not find target cell to add topic.");
+                return;
+            }
+            
+            const topicEl = createTopicElement(topicId, newTopicName);
+            const addBtn = targetCell.querySelector('.add-topic-btn');
+            targetCell.insertBefore(topicEl, addBtn);
+            
+            appData.completedTopics[topicId] = {
+                progress: 0,
+                note: '',
+                name: newTopicName
+            };
+            
+            saveDataToFirestore();
+            updateProgressBarForCell(targetCell);
+            addTopicModalEl.classList.add('hidden');
+        }
+
+
+        function handleEditClick(iconEl) {
+            const topicId = iconEl.dataset.topicId;
+            const currentData = appData.completedTopics[topicId] || {};
+            const nameEl = iconEl.closest('.topic-item').querySelector('.topic-name');
+            
+            const defaultName = nameEl ? nameEl.textContent : '';
+            const currentName = currentData.name || defaultName;
+            const currentNote = currentData.note || '';
+            
+            modalEl.dataset.currentTopicId = topicId;
+            modalTopicName.value = currentName;
+            modalTopicNote.value = currentNote;
+            modalEl.classList.remove('hidden');
+            modalTopicName.focus();
+        }
+        
+        function handleModalSave() {
+            const topicId = modalEl.dataset.currentTopicId;
+            if (!topicId) return;
+            
+            const newName = modalTopicName.value.trim();
+            const newNote = modalTopicNote.value.trim();
+            
+            if (newName === '') {
+                alert("Topic name cannot be empty.");
+                return;
+            }
+            
+            const currentData = appData.completedTopics[topicId] || { progress: 0 };
+            
+            appData.completedTopics[topicId] = {
+                ...currentData,
+                name: newName,
+                note: newNote
+            };
+            
+            const box = document.querySelector(`.progress-box[data-topic-id="${topicId}"]`);
+            if (box) {
+                const item = box.closest('.topic-item');
+                const nameEl = item.querySelector('.topic-name');
+                if (nameEl) nameEl.textContent = newName;
+                
+                const iconEl = item.querySelector('.edit-icon');
+                if (iconEl) iconEl.classList.toggle('has-note', !!newNote);
+            }
+            
+            saveDataToFirestore();
+            modalEl.classList.add('hidden');
+        }
+
+        function handleModalDelete() {
+            const topicId = modalEl.dataset.currentTopicId;
+            if (!topicId) return;
+            
+            const progressBox = document.querySelector(`.topic-item [data-topic-id="${topicId}"]`);
+            let cell = null;
+            
+            if (progressBox) {
+                const topicElement = progressBox.closest('.topic-item');
+                cell = topicElement.closest('td');
+                topicElement.remove(); 
+            }
+            
+            delete appData.completedTopics[topicId];
+            saveDataToFirestore();
+            updateProgressBarForCell(cell);
+            modalEl.classList.add('hidden');
+        }
+
+        // --- NEW: Drag & Drop Handler ---
+        function handleDragDrop(draggedElement, toCell) {
+            const oldCell = draggedElement.closest('td');
+            if (oldCell === toCell) return; // Dropped in the same cell
+
+            // Get info for new ID
+            const newRow = toCell.closest('tr');
+            const newTable = toCell.closest('table');
+            const newDateCell = newRow.cells[0]?.querySelector('div');
+            if (!newDateCell) return;
+            
+            const newDate = newDateCell.textContent.trim();
+            if (newDate === 'New Date') {
+                alert("Cannot drop topic into a row with an unsaved date.");
+                return;
+            }
+            
+            const newColName = toCell.dataset.label;
+            const newTableId = newTable.id;
+
+            // Get old data and ID
+            const progressBox = draggedElement.querySelector('.progress-box');
+            const oldTopicId = progressBox.dataset.topicId;
+            const oldData = appData.completedTopics[oldTopicId];
+            const topicName = draggedElement.querySelector('.topic-name').textContent;
+            
+            // Create new ID
+            const newTopicId = createTopicId(newTableId, newDate, newColName, topicName);
+            
+            // Check for collision
+            if (appData.completedTopics[newTopicId] || document.querySelector(`[data-topic-id="${newTopicId}"]`)) {
+                alert("A topic with this name already exists in the target cell.");
+                return;
+            }
+
+            // Update Data
+            delete appData.completedTopics[oldTopicId];
+            appData.completedTopics[newTopicId] = oldData;
+            
+            // Update DOM
+            progressBox.dataset.topicId = newTopicId;
+            draggedElement.querySelector('.edit-icon').dataset.topicId = newTopicId;
+            toCell.insertBefore(draggedElement, toCell.querySelector('.add-topic-btn'));
+
+            // Save and update progress
+            saveDataToFirestore();
+            updateProgressBarForCell(oldCell);
+            updateProgressBarForCell(toCell);
+        }
+
+        // --- Progress Bar Functions ---
+        
+        function updateAllProgressBars() {
+            updateColumnProgressBars('table1');
+            updateColumnProgressBars('table2');
+            updateOverallProgress();
+            updateTable2Progress();
+            updateTaskCounters();
+        }
+         
+        function updateProgressBarForCell(cellElement) {
+            if (!cellElement) {
+                updateAllProgressBars();
+                return;
+            }
+            const table = cellElement.closest('table');
+            if (table) updateColumnProgressBars(table.id);
+            updateOverallProgress();
+            updateTable2Progress();
+            updateTaskCounters();
+        }
+
+        function updateColumnProgressBars(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            table.querySelectorAll('thead th').forEach((th, colIndex) => {
+                if (colIndex === 0) return; 
+                const thText = th.textContent.trim();
+                let colName = '';
+                
+                if (thText.includes('Phy')) colName = 'phy';
+                else if (thText.includes('Chem')) colName = 'chem';
+                else if (thText.includes('Bio')) colName = 'bio';
+                else if (thText.includes('GK')) colName = 'gk';
+                else if (thText.includes('English')) colName = 'english';
+                else if (thText.includes('Morning')) colName = 'morning';
+                else if (thText.includes('Noon')) colName = 'noon';
+                else if (thText.includes('Night')) colName = 'night';
+                else if (thText.includes('Secret')) colName = 'secret';
+                else return; 
+                
+                const progressBarId = `${tableId.replace('table', 't')}_col_${colName}`;
+                let totalProgress = 0;
+                let totalTopics = 0;
+                
+                table.querySelectorAll(`tbody tr td:nth-child(${colIndex + 1})`).forEach(cell => {
+                    const topics = cell.querySelectorAll('.progress-box');
+                    topics.forEach(topic => {
+                        const topicId = topic.dataset.topicId;
+                        totalProgress += appData.completedTopics[topicId]?.progress || 0;
+                    });
+                    totalTopics += topics.length;
+                });
+                
+                const colBar = document.getElementById(progressBarId);
+                if (!colBar) return;
+                
+                if (totalTopics === 0) {
+                    colBar.style.width = '0%';
+                    colBar.classList.add('opacity-0');
+                } else {
+                    const avgProgress = totalProgress / totalTopics;
+                    colBar.style.width = `${avgProgress}%`;
+                    colBar.classList.remove('opacity-0');
+                }
+            });
+        }
+        
+        function updateOverallProgress() {
+            const table1 = document.getElementById('table1');
+            const bar = document.getElementById('overall-progress-bar');
+            const text = document.getElementById('overall-progress-text');
+            if (!table1 || !bar || !text) return;
+            
+            const allBoxes = table1.querySelectorAll('.progress-box');
+            let totalProgress = 0;
+            allBoxes.forEach(box => {
+                const topicId = box.dataset.topicId;
+                totalProgress += appData.completedTopics[topicId]?.progress || 0;
+            });
+
+            const totalBoxesCount = allBoxes.length;
+            const overallAvg = totalBoxesCount > 0 ? (totalProgress / totalBoxesCount) : 0;
+            bar.style.width = `${overallAvg}%`;
+            text.textContent = `${Math.round(overallAvg)}%`;
+        }
+        
+        function updateTable2Progress() {
+            const table2 = document.getElementById('table2');
+            const bar = document.getElementById('t2-overall-progress-bar');
+            const text = document.getElementById('t2-overall-progress-text');
+            if (!table2 || !bar || !text) return;
+            
+            const allBoxes = table2.querySelectorAll('.progress-box');
+            let totalProgress = 0;
+            allBoxes.forEach(box => {
+                const topicId = box.dataset.topicId;
+                totalProgress += appData.completedTopics[topicId]?.progress || 0;
+            });
+
+            const totalBoxesCount = allBoxes.length;
+            const overallAvg = totalBoxesCount > 0 ? (totalProgress / totalBoxesCount) : 0;
+            bar.style.width = `${overallAvg}%`;
+            text.textContent = `${Math.round(overallAvg)}%`;
+        }
+        
+        function updateTaskCounters() {
+            ['table1', 'table2'].forEach(tableId => {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+
+                const allBoxes = table.querySelectorAll('.progress-box');
+                const totalTasks = allBoxes.length;
+                let completedTasks = 0;
+                allBoxes.forEach(box => {
+                    const topicId = box.dataset.topicId;
+                    if (appData.completedTopics[topicId] && appData.completedTopics[topicId].progress === 100) {
+                        completedTasks++;
+                    }
+                });
+
+                const counterElId = tableId.replace('table', 't') + '_task_counter';
+                const counterEl = document.getElementById(counterElId);
+                if (counterEl) {
+                    counterEl.textContent = `${completedTasks} / ${totalTasks} Done`;
+                    counterEl.classList.remove('opacity-0');
+                }
+            });
+        }
+        
+        function startCountdown() {
+            const daysEl = document.getElementById('countdown-days');
+            const hoursEl = document.getElementById('countdown-hours');
+            const minutesEl = document.getElementById('countdown-minutes');
+            const secondsEl = document.getElementById('countdown-seconds');
+            
+            if (!daysEl || !hoursEl || !minutesEl || !secondsEl) {
+                console.warn("Countdown elements not found. Skipping countdown.");
+                const card = document.getElementById('countdown-card');
+                if (card) card.classList.add('hidden');
+                return;
+            }
+            
+            // --- FIX (Bug #7): Use UTC Time ---
+            const countDownDate = new Date("2025-12-12T00:00:00Z").getTime();
+
+            countdownInterval = setInterval(() => {
+                const now = new Date().getTime();
+                // Get UTC time by subtracting timezone offset
+                const utcNow = now + (new Date().getTimezoneOffset() * 60000);
+                const distance = countDownDate - utcNow;
+
+                if (distance < 0) {
+                    clearInterval(countdownInterval);
+                    daysEl.textContent = "00";
+                    hoursEl.textContent = "00";
+                    minutesEl.textContent = "00";
+                    secondsEl.textContent = "00";
+                    const countdownTitle = document.getElementById('countdown-card')?.querySelector('h2');
+                    if (countdownTitle) countdownTitle.textContent = "The day is here!";
+                    return;
+                }
+                
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                daysEl.textContent = String(days).padStart(2, '0');
+                hoursEl.textContent = String(hours).padStart(2, '0');
+                minutesEl.textContent = String(minutes).padStart(2, '0');
+                secondsEl.textContent = String(seconds).padStart(2, '0');
+            }, 1000);
+            
+            window.addEventListener('beforeunload', () => {
+                if (countdownInterval) clearInterval(countdownInterval);
+                if (saveTimeout) clearTimeout(saveTimeout);
+                if (unsubscribeSnapshot) unsubscribeSnapshot(); // --- FIX (Bug #5)
+            });
+        }
+
+        let toastTimeout = null;
+        function showToast(status) {
+            const toast = document.getElementById('sync-toast');
+            const text = document.getElementById('toast-text');
+            const spinner = document.getElementById('toast-spinner');
+            if (!toast || !text || !spinner) return;
+
+            if (toastTimeout) clearTimeout(toastTimeout);
+            
+            toast.classList.remove('bg-green-600', 'bg-yellow-600', 'bg-red-600', 'bg-blue-600');
+            spinner.classList.add('hidden');
+            
+            if (status === 'syncing') {
+                text.textContent = 'Syncing...';
+                toast.classList.add('bg-yellow-600');
+                spinner.classList.remove('hidden');
+            } else if (status === 'synced') {
+                text.textContent = 'Synced';
+                toast.classList.add('bg-green-600');
+            } else if (status === 'cached') {
+                text.textContent = 'Offline (Cached)';
+                toast.classList.add('bg-blue-600');
+            } else if (status === 'error') {
+                text.textContent = 'Sync Error';
+                toast.classList.add('bg-red-600');
+            }
+            
+            toast.classList.add('show');
+            
+            if (status !== 'syncing') {
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        }
+        
+    </script>
+</body>
+</html>
+
+
