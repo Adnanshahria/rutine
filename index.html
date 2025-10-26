@@ -38,26 +38,26 @@
             background: #555;
         }
 
-        /* Progress Box States */
+        /* --- MOBILE OPTIMIZATION (Box Size) --- */
         .progress-box {
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 0.8rem;
+            /* Smaller font for smaller box */
+            font-size: 0.7rem; 
             cursor: pointer;
             user-select: none;
             transition: all 0.2s ease-in-out;
             color: white;
             border-radius: 8px;
             
-            /* --- CRITICAL FIX (Bug #2): Fixed dimensions --- */
-            width: 50px;
-            min-width: 50px;
-            max-width: 50px;
-            height: 50px;
+            /* Reduced size from 50px to 40px */
+            width: 40px;
+            min-width: 40px;
+            max-width: 40px;
+            height: 40px;
             flex-shrink: 0;
-            /* --- End Fix --- */
             
             box-sizing: border-box; 
             border: 2px solid transparent;
@@ -77,19 +77,30 @@
         .topic-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem; /* 12px */
-            padding: 0.5rem; /* 8px */
+            /* Reduced gap for smaller box */
+            gap: 0.5rem; /* 8px */
+            padding: 0.3rem; /* 4px */
             border-radius: 8px;
             transition: background-color 0.2s;
         }
         .topic-item:hover {
             background-color: rgba(255, 255, 255, 0.05);
         }
+        
+        /* Card View Topic Item (Slightly more padding) */
+        .card-view-container .topic-item {
+            padding: 0.5rem;
+            gap: 0.75rem;
+        }
+
 
         .topic-name {
             flex-grow: 1;
             font-weight: 500;
             color: var(--color-text-main);
+            /* Allow name to wrap if long */
+            white-space: normal;
+            word-break: break-word;
         }
 
         .edit-icon {
@@ -109,52 +120,23 @@
         .edit-icon.has-note:hover {
             color: #fde047; /* yellow-300 */
         }
-
-        /* Table Responsive */
-        @media (max-width: 768px) {
-            thead { display: none; }
-            tr {
-                display: block;
-                margin-bottom: 1rem;
-                border-radius: 8px;
-                border: 1px solid var(--color-border);
-                overflow: hidden;
-            }
-            td {
-                display: block;
-                text-align: right;
-                padding-left: 50%;
-                position: relative;
-                border-bottom: 1px solid var(--color-border);
-            }
-            td:last-child {
-                border-bottom: none;
-            }
-            td::before {
-                content: attr(data-label);
-                position: absolute;
-                left: 0;
-                width: 45%;
-                padding: 0.75rem 1rem;
-                text-align: left;
-                font-weight: 600;
-                color: var(--color-text-dim);
-            }
-            td[data-label="Date"] {
-                padding-left: 0.75rem;
-                text-align: left;
-                background-color: var(--color-bg-header);
-            }
-            td[data-label="Date"]::before {
-                display: none;
-            }
-        }
+        
+        /* --- MOBILE OPTIMIZATION (Old responsive table CSS removed) --- */
+        /* The old @media (max-width: 768px) block that stacked <td>s 
+           has been removed. We now use Card View instead. */
 
         /* Toast Notification */
         #toast {
             position: fixed;
             bottom: 20px;
-            right: 20px;
+            /* Centered on mobile */
+            left: 50%;
+            transform: translateX(-50%);
+            /* On desktop, move to corner */
+            md:left: auto;
+            md:right: 20px;
+            md:transform: none;
+            
             padding: 10px 15px;
             border-radius: 50px;
             font-weight: 600;
@@ -164,14 +146,20 @@
             z-index: 100;
             transition: opacity 0.3s, transform 0.3s;
             opacity: 0;
-            transform: translateY(20px);
         }
-        /* --- CRITICAL FIX (Toast): Added .show definition --- */
         #toast.show {
             opacity: 1;
-            transform: translateY(0);
+            /* No Y transform, just fade in */
+            transform: translateX(-50%) translateY(0);
         }
-        /* --- End Fix --- */
+        @media (min-width: 768px) {
+            #toast {
+                transform: translateY(20px);
+            }
+            #toast.show {
+                transform: translateY(0);
+            }
+        }
         
         /* Spinner */
         @keyframes spin {
@@ -231,6 +219,80 @@
             position: relative;
         }
         
+        /* Card View Styles */
+        .card-view-container .date-card {
+            background-color: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .card-view-container .date-header {
+            background-color: var(--color-bg-header);
+            padding: 0.75rem 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-view-container .column-section {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .card-view-container .column-section:last-child {
+            border-bottom: none;
+        }
+        .card-view-container .column-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--color-bg-header);
+            transition: .4s;
+            border-radius: 28px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--color-accent-blue);
+        }
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans p-4 md:p-8" ondragover="event.preventDefault()">
@@ -238,26 +300,39 @@
     <!-- Header -->
     <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
-            <h1 class="text-4xl font-bold text-white">Last Fight <span class="text-green-500">Tracker</span></h1>
-            <!-- Countdown Card -->
-            <div class="bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700">
-                <h3 class="text-lg font-semibold text-center text-yellow-400 mb-2">Countdown to Dec 12, 2025</h3>
-                <div id="countdown" class="flex justify-center gap-3 text-center">
-                    <div>
-                        <span id="days" class="text-3xl font-bold text-white">00</span>
-                        <span class="block text-xs text-gray-400">Days</span>
-                    </div>
-                    <div>
-                        <span id="hours" class="text-3xl font-bold text-white">00</span>
-                        <span class="block text-xs text-gray-400">Hours</span>
-                    </div>
-                    <div>
-                        <span id="minutes" class="text-3xl font-bold text-white">00</span>
-                        <span class="block text-xs text-gray-400">Mins</span>
-                    </div>
-                    <div>
-                        <span id="seconds" class="text-3xl font-bold text-white">00</span>
-                        <span class="block text-xs text-gray-400">Secs</span>
+            <h1 class="text-3xl md:text-4xl font-bold text-white">Last Fight <span class="text-green-500">Tracker</span></h1>
+            
+            <!-- MOBILE OPTIMIZATION: View Toggle -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-400 text-sm">Table</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="view-toggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="font-medium text-gray-400 text-sm">Card</span>
+                </div>
+            
+                <!-- Countdown Card -->
+                <div class="bg-gray-800 p-3 md:p-4 rounded-lg shadow-lg border border-gray-700">
+                    <h3 class="text-xs md:text-lg font-semibold text-center text-yellow-400 mb-1 md:mb-2">Countdown</h3>
+                    <div id="countdown" class="flex justify-center gap-2 md:gap-3 text-center">
+                        <div>
+                            <span id="days" class="text-xl md:text-3xl font-bold text-white">00</span>
+                            <span class="block text-xs text-gray-400">Days</span>
+                        </div>
+                        <div>
+                            <span id="hours" class="text-xl md:text-3xl font-bold text-white">00</span>
+                            <span class="block text-xs text-gray-400">Hours</span>
+                        </div>
+                        <div>
+                            <span id="minutes" class="text-xl md:text-3xl font-bold text-white">00</span>
+                            <span class="block text-xs text-gray-400">Mins</span>
+                        </div>
+                        <div>
+                            <span id="seconds" class="text-xl md:text-3xl font-bold text-white">00</span>
+                            <span class="block text-xs text-gray-400">Secs</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -294,113 +369,130 @@
                 </div>
             </div>
 
-            <!-- Table 1: Subject-wise Topics -->
-            <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8 overflow-hidden">
-                <div class="p-4 md:p-6 border-b border-gray-700">
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                        <h2 class="text-2xl font-semibold text-white">Table 1: Subject-wise Topics (Syllabus)</h2>
-                        <span id="t1_task_counter" class="bg-green-500/20 text-green-300 text-sm font-semibold px-3 py-1 rounded-full opacity-0 transition-opacity">
-                            0 / 0 Done
-                        </span>
+            <!-- MOBILE OPTIMIZATION: View Containers -->
+            <div id="table-view-container">
+                <!-- Table 1: Subject-wise Topics -->
+                <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8 overflow-hidden">
+                    <div class="p-4 md:p-6 border-b border-gray-700">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                            <h2 class="text-xl md:text-2xl font-semibold text-white">Table 1: Subject-wise Topics (Syllabus)</h2>
+                            <span id="t1_task_counter" class="bg-green-500/20 text-green-300 text-sm font-semibold px-3 py-1 rounded-full opacity-0 transition-opacity">
+                                0 / 0 Done
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Sticky Column: Added overflow-x-auto wrapper -->
+                    <div class="overflow-x-auto">
+                        <table id="table1" class="w-full min-w-[700px]">
+                            <thead class="bg-gray-700 text-left">
+                                <tr>
+                                    <!-- Sticky Column: Added sticky classes and bg color -->
+                                    <th class="p-4 font-semibold w-1/6 sticky left-0 z-10 bg-gray-700">Date</th>
+                                    <th class="p-4 font-semibold w-1/6">
+                                        Phy
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_phy" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/6">
+                                        Chem
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_chem" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/6">
+                                        Bio
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_bio" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/6">
+                                        GK
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_gk" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/6">
+                                        English
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t1_col_english" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                <!-- Rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 bg-gray-800 border-t border-gray-700">
+                        <button id="add-row-t1" class="w-full text-lg text-gray-400 hover:text-white font-semibold p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-gray-500 transition-colors">
+                            + Add New Row
+                        </button>
                     </div>
                 </div>
-                <table id="table1" class="w-full min-w-[700px]">
-                    <thead class="bg-gray-700 text-left">
-                        <tr>
-                            <th class="p-4 font-semibold w-1/6">Date</th>
-                            <th class="p-4 font-semibold w-1/6">
-                                Phy
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t1_col_phy" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/6">
-                                Chem
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t1_col_chem" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/6">
-                                Bio
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t1_col_bio" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/6">
-                                GK
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t1_col_gk" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/6">
-                                English
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t1_col_english" class="bg-green-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <!-- Rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="p-4 bg-gray-800 border-t border-gray-700">
-                    <button id="add-row-t1" class="w-full text-lg text-gray-400 hover:text-white font-semibold p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-gray-500 transition-colors">
-                        + Add New Row
-                    </button>
-                </div>
-            </div>
 
-            <!-- Table 2: Daily Session Plan -->
-            <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8 overflow-hidden">
-                <div class="p-4 md:p-6 border-b border-gray-700">
-                    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                        <h2 class="text-2xl font-semibold text-white">Table 2: Daily Session Plan</h2>
-                        <span id="t2_task_counter" class="bg-blue-500/20 text-blue-300 text-sm font-semibold px-3 py-1 rounded-full opacity-0 transition-opacity">
-                            0 / 0 Done
-                        </span>
+                <!-- Table 2: Daily Session Plan -->
+                <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-8 overflow-hidden">
+                    <div class="p-4 md:p-6 border-b border-gray-700">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                            <h2 class="text-xl md:text-2xl font-semibold text-white">Table 2: Daily Session Plan</h2>
+                            <span id="t2_task_counter" class="bg-blue-500/20 text-blue-300 text-sm font-semibold px-3 py-1 rounded-full opacity-0 transition-opacity">
+                                0 / 0 Done
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Sticky Column: Added overflow-x-auto wrapper -->
+                    <div class="overflow-x-auto">
+                        <table id="table2" class="w-full min-w-[700px]">
+                            <thead class="bg-gray-700 text-left">
+                                <tr>
+                                    <!-- Sticky Column: Added sticky classes and bg color -->
+                                    <th class="p-4 font-semibold w-1/5 sticky left-0 z-10 bg-gray-700">Date</th>
+                                    <th class="p-4 font-semibold w-1/5">
+                                        Morning Session
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_morning" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/5">
+                                        Noon Session
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_noon" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/5">
+                                        Night Session
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_night" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                    <th class="p-4 font-semibold w-1/5">
+                                        Secret Files
+                                        <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+                                            <div id="t2_col_secret" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-700">
+                                <!-- Rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-4 bg-gray-800 border-t border-gray-700">
+                        <button id="add-row-t2" class="w-full text-lg text-gray-400 hover:text-white font-semibold p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-gray-500 transition-colors">
+                            + Add New Row
+                        </button>
                     </div>
                 </div>
-                <table id="table2" class="w-full min-w-[700px]">
-                    <thead class="bg-gray-700 text-left">
-                        <tr>
-                            <th class="p-4 font-semibold w-1/5">Date</th>
-                            <th class="p-4 font-semibold w-1/5">
-                                Morning Session
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t2_col_morning" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/5">
-                                Noon Session
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t2_col_noon" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/5">
-                                Night Session
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t2_col_night" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                            <th class="p-4 font-semibold w-1/5">
-                                Secret Files
-                                <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-                                    <div id="t2_col_secret" class="bg-blue-500 h-1.5 rounded-full transition-all" style="width: 0%"></div>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <!-- Rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
-                <div class="p-4 bg-gray-800 border-t border-gray-700">
-                    <button id="add-row-t2" class="w-full text-lg text-gray-400 hover:text-white font-semibold p-3 border-2 border-dashed border-gray-600 rounded-lg hover:border-gray-500 transition-colors">
-                        + Add New Row
-                    </button>
-                </div>
             </div>
+            
+            <!-- This container will be filled by JS for Card View -->
+            <div id="card-view-container" class="hidden">
+                <!-- Card content will be generated here -->
+            </div>
+            
         </div>
     </div>
 
@@ -411,7 +503,7 @@
     </div>
     
     <!-- Add Topic Modal -->
-    <div id="add-topic-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center hidden">
+    <div id="add-topic-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center hidden p-4">
         <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-md border border-gray-700">
             <h3 class="text-xl font-semibold mb-4">Add New Topic</h3>
             <div class="mb-4">
@@ -426,7 +518,7 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div id="edit-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-gray-800 p-6 rounded-lg shadow-2xl w-full max-w-lg border border-gray-700">
             <h3 class="text-xl font-semibold mb-4">Edit Topic</h3>
             <div class="mb-4">
@@ -437,7 +529,7 @@
                 <label for="modal-topic-note" class="block text-sm font-medium text-gray-300 mb-1">Notes</label>
                 <textarea id="modal-topic-note" rows="4" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add your notes here..."></textarea>
             </div>
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center flex-wrap gap-4">
                 <button id="modal-delete" class="px-4 py-2 bg-red-700 hover:bg-red-600 text-white rounded-md transition-colors font-semibold">Delete Topic</button>
                 <div class="flex gap-3">
                     <button id="modal-cancel" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded-md transition-colors">Cancel</button>
@@ -551,12 +643,18 @@
         const modalTopicNote = document.getElementById('modal-topic-note');
         const addTopicModalEl = document.getElementById('add-topic-modal');
         const addTopicModalName = document.getElementById('add-topic-modal-name');
+        
+        // Mobile View Elements
+        const viewToggle = document.getElementById('view-toggle');
+        const tableViewContainer = document.getElementById('table-view-container');
+        const cardViewContainer = document.getElementById('card-view-container');
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeAppFirebase();
             startCountdown();
             setupGlobalEventListeners();
+            setupViewToggle(); // Setup the new toggle
         });
 
         async function initializeAppFirebase() {
@@ -574,7 +672,6 @@
                     }
                 }
                 
-                // **FIX: Fallback Firebase config**
                 if (!firebaseConfig || !firebaseConfig.apiKey) {
                     firebaseConfig = {
                         apiKey: "AIzaSyDTLhIkrW9qk6KPT_gTDibIiJeVwWYTowk",
@@ -671,11 +768,22 @@
             if (isFirstLoad) {
                 populateTables();
                 isFirstLoad = false;
+                // On first load, check saved view preference
+                const savedView = localStorage.getItem('viewMode');
+                if (savedView === 'card') {
+                    viewToggle.checked = true;
+                    toggleViewMode(true);
+                }
             } else {
                 updateExistingTopics();
             }
             
             updateAllProgressBars();
+            
+            // Re-render card view if it's active and data changes
+            if (viewToggle.checked) {
+                renderCardView();
+            }
             
             loadingEl.classList.add('hidden');
             contentEl.classList.remove('hidden');
@@ -696,9 +804,13 @@
 
                 // Get sorted dates (important for rows added dynamically)
                 const dates = Object.keys(data).sort((a, b) => {
-                    const dateA = new Date(a.split('/').reverse().join('-'));
-                    const dateB = new Date(b.split('/').reverse().join('-'));
-                    return dateA - dateB;
+                    try {
+                        const dateA = new Date(a.split('/').reverse().join('-'));
+                        const dateB = new Date(b.split('/').reverse().join('-'));
+                        return dateA - dateB;
+                    } catch (e) {
+                        return 0;
+                    }
                 });
 
                 dates.forEach(date => {
@@ -718,7 +830,8 @@
             
             // 1. Create Date Cell
             const dateCell = document.createElement('td');
-            dateCell.className = 'p-4 align-top';
+            // --- STICKY COLUMN: Added sticky classes and bg color ---
+            dateCell.className = 'p-4 align-top sticky left-0 z-10 bg-gray-800';
             dateCell.dataset.label = "Date";
             
             const dateDiv = document.createElement('div');
@@ -726,7 +839,7 @@
             dateDiv.textContent = date;
             dateDiv.contentEditable = "true";
             dateDiv.dataset.originalDate = date;
-            dateDiv.dataset.label = "Date"; // <-- THE FIX (For blur event)
+            dateDiv.dataset.label = "Date"; // For blur event
             dateDiv.setAttribute('placeholder', 'DD/MM/YYYY');
             
             dateCell.appendChild(dateDiv);
@@ -1008,6 +1121,93 @@
             });
         }
         
+        // --- MOBILE OPTIMIZATION: View Toggle Logic ---
+        
+        function setupViewToggle() {
+            if (!viewToggle) return;
+            viewToggle.addEventListener('change', () => {
+                const isCardView = viewToggle.checked;
+                toggleViewMode(isCardView);
+                localStorage.setItem('viewMode', isCardView ? 'card' : 'table');
+            });
+        }
+
+        function toggleViewMode(isCardView) {
+            if (isCardView) {
+                if (!cardViewContainer.dataset.rendered) {
+                    renderCardView();
+                }
+                tableViewContainer.classList.add('hidden');
+                cardViewContainer.classList.remove('hidden');
+            } else {
+                tableViewContainer.classList.remove('hidden');
+                cardViewContainer.classList.add('hidden');
+            }
+        }
+        
+        /**
+         * Renders the mobile-friendly Card View.
+         * Clones topic items from the hidden table for efficiency.
+         */
+        function renderCardView() {
+            cardViewContainer.innerHTML = ''; // Clear previous render
+            
+            ['table1', 'table2'].forEach(tableId => {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                
+                const tableTitle = tableId === 'table1' ? 'Table 1: Syllabus' : 'Table 2: Daily Plan';
+                const tableTitleEl = document.createElement('h2');
+                tableTitleEl.className = 'text-xl md:text-2xl font-semibold text-white mb-4';
+                tableTitleEl.textContent = tableTitle;
+                cardViewContainer.appendChild(tableTitleEl);
+
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const dateCell = row.cells[0]?.querySelector('div');
+                    if (!dateCell) return;
+                    
+                    const date = dateCell.textContent.trim();
+                    
+                    // Create Card
+                    const card = document.createElement('div');
+                    card.className = 'date-card';
+                    
+                    const cardHeader = document.createElement('div');
+                    cardHeader.className = 'date-header';
+                    cardHeader.innerHTML = `<h3 class="text-lg font-bold text-white">${date}</h3>`;
+                    card.appendChild(cardHeader);
+                    
+                    // Add columns as sections
+                    const headers = Array.from(table.querySelectorAll('thead th')).slice(1);
+                    headers.forEach((th, index) => {
+                        const colName = th.textContent.trim().split('\n')[0];
+                        const cell = row.cells[index + 1]; // +1 to skip date cell
+                        if (!cell) return;
+                        
+                        const topicItems = cell.querySelectorAll('.topic-item');
+                        if (topicItems.length === 0) return; // Skip empty sections
+                        
+                        const section = document.createElement('div');
+                        section.className = 'column-section';
+                        section.innerHTML = `<span class="column-title">${colName}</span>`;
+                        
+                        topicItems.forEach(item => {
+                            // Clone the item. Event listeners work due to delegation.
+                            section.appendChild(item.cloneNode(true));
+                        });
+                        
+                        card.appendChild(section);
+                    });
+                    
+                    cardViewContainer.appendChild(card);
+                });
+            });
+            
+            cardViewContainer.dataset.rendered = "true";
+        }
+        
+        
         // --- Event Handler Logic ---
 
         /**
@@ -1029,9 +1229,11 @@
             
             const newProgress = progressSteps[nextIndex];
             
-            // Optimistic UI Update
-            box.className = `progress-box progress-${newProgress}`;
-            box.textContent = `${newProgress}%`;
+            // Optimistic UI Update (Update ALL matching boxes in both views)
+            document.querySelectorAll(`.progress-box[data-topic-id="${topicId}"]`).forEach(b => {
+                b.className = `progress-box progress-${newProgress}`;
+                b.textContent = `${newProgress}%`;
+            });
             
             // Update local appData
             if (!appData.completedTopics[topicId]) {
@@ -1053,21 +1255,59 @@
          * Opens the "Add Topic" modal.
          */
         function handleAddTopicClick(button) {
-            const cell = button.closest('td');
-            const row = cell.closest('tr');
-            const table = cell.closest('table');
-            const dateDiv = row.cells[0]?.querySelector('div');
+            // Find context, whether in Table or Card view
+            let cell, row, table, dateDiv, colName, tableId, date;
+            
+            const cardSection = button.closest('.column-section');
+            if (cardSection) {
+                // We are in Card View
+                const card = button.closest('.date-card');
+                tableId = card.dataset.tableId; // We need to add this
+                date = card.dataset.date; // We need to add this
+                colName = cardSection.dataset.colName; // We need to add this
+                
+                // This is complex. Let's find the original cell in the hidden table
+                const tableEl = document.getElementById(tableId);
+                // ... this is too complex.
+                
+                // Simpler: The button is always in the Table View DOM, even if hidden.
+                cell = button.closest('td');
+            } else {
+                // We are in Table View
+                cell = button.closest('td');
+            }
+            
+            if (!cell) {
+                 // Fallback for card view (which clones elements)
+                const topicItem = button.closest('.topic-item');
+                if (topicItem) {
+                    const topicId = topicItem.querySelector('[data-topic-id]').dataset.topicId;
+                    const originalBox = document.querySelector(`#table-view-container .progress-box[data-topic-id="${topicId}"]`);
+                    if (originalBox) cell = originalBox.closest('td');
+                }
+                if (!cell) {
+                     console.error("Cannot find cell context for Add Topic");
+                     return;
+                }
+            }
+
+            row = cell.closest('tr');
+            table = cell.closest('table');
+            dateDiv = row.cells[0]?.querySelector('div');
             
             if (!dateDiv) return;
-            const date = dateDiv.textContent.trim();
+            date = dateDiv.textContent.trim();
             if (date === 'New Date' || date === '') {
                 alert("Please set a valid date for this row before adding topics.");
-                dateDiv.focus();
+                // We can't focus if in card view, but the alert is enough.
+                if (!viewToggle.checked) {
+                    dateDiv.focus();
+                }
                 return;
             }
             
-            const colName = cell.dataset.label;
-            const tableId = table.id;
+            colName = cell.dataset.label;
+            tableId = table.id;
             
             addTopicModalEl.dataset.tableId = tableId;
             addTopicModalEl.dataset.colName = colName;
@@ -1102,7 +1342,7 @@
                 return;
             }
 
-            // Find the correct cell
+            // Find the correct cell in the *master* table view
             const table = document.getElementById(tableId);
             let targetCell = null;
             const rows = table.querySelectorAll('tbody tr');
@@ -1141,6 +1381,11 @@
             saveDataToFirestore();
             updateProgressBarForCell(targetCell);
             addTopicModalEl.classList.add('hidden');
+            
+            // Re-render card view if it's active
+            if (viewToggle.checked) {
+                renderCardView();
+            }
         }
 
         /**
@@ -1155,6 +1400,7 @@
             }
             
             const currentData = appData.completedTopics[topicId] || {};
+            // Find the name from the clicked element (works in both views)
             const nameEl = iconEl.closest('.topic-item').querySelector('.topic-name');
             
             const defaultName = nameEl ? nameEl.textContent : '';
@@ -1185,7 +1431,8 @@
             
             const currentData = appData.completedTopics[topicId] || { progress: 0 };
             
-            const box = document.querySelector(`.progress-box[data-topic-id="${topicId}"]`);
+            // Find the element in the master table view
+            const box = document.querySelector(`#table-view-container .progress-box[data-topic-id="${topicId}"]`);
             if (box) {
                 const item = box.closest('.topic-item');
                 const nameEl = item.querySelector('.topic-name');
@@ -1207,7 +1454,7 @@
                         const newTopicId = createTopicId(tableId, date, colName, newName);
                         
                         // Check if new ID would conflict
-                        if (newTopicId !== topicId && appData.completedTopics[newTopicId]) {
+                        if (newTopicId !== topicId && (appData.completedTopics[newTopicId] || document.querySelector(`[data-topic-id="${newTopicId}"]`))) {
                             alert("A topic with this name already exists in this cell.");
                             return;
                         }
@@ -1221,8 +1468,12 @@
                             }
                         }
                         
-                        // Update DOM display
-                        if (nameEl) nameEl.textContent = newName;
+                        // Update DOM display (in both views)
+                        document.querySelectorAll(`.topic-name`).forEach(el => {
+                            if(el.closest('.topic-item')?.querySelector(`.progress-box[data-topic-id="${topicId}"]`)) {
+                                el.textContent = newName;
+                            }
+                        });
                         
                         // If ID changed, migrate data
                         if (newTopicId !== topicId) {
@@ -1233,10 +1484,10 @@
                                 note: newNote
                             };
                             
-                            // Update DOM references
-                            box.dataset.topicId = newTopicId;
-                            const iconEl = item.querySelector('.edit-icon');
-                            if (iconEl) iconEl.dataset.topicId = newTopicId;
+                            // Update DOM references (in both views)
+                            document.querySelectorAll(`.progress-box[data-topic-id="${topicId}"]`).forEach(b => b.dataset.topicId = newTopicId);
+                            document.querySelectorAll(`.edit-icon[data-topic-id="${topicId}"]`).forEach(i => i.dataset.topicId = newTopicId);
+
                         } else {
                             appData.completedTopics[topicId] = {
                                 ...currentData,
@@ -1254,8 +1505,10 @@
                     };
                 }
                 
-                const iconEl = item.querySelector('.edit-icon');
-                if (iconEl) iconEl.classList.toggle('has-note', !!newNote);
+                // Update note icon (in both views)
+                document.querySelectorAll(`.edit-icon[data-topic-id="${appData.completedTopics[newTopicId] ? newTopicId : topicId}"]`).forEach(iconEl => {
+                     iconEl.classList.toggle('has-note', !!newNote);
+                });
             }
             
             saveDataToFirestore();
@@ -1273,7 +1526,8 @@
                 return;
             }
             
-            const progressBox = document.querySelector(`.progress-box[data-topic-id="${topicId}"]`);
+            // Find the element in the master table view
+            const progressBox = document.querySelector(`#table-view-container .progress-box[data-topic-id="${topicId}"]`);
             let cell = null;
             
             if (progressBox) {
@@ -1306,7 +1560,14 @@
                     }
                 }
                 
-                topicElement.remove(); 
+                // Remove from Table View DOM
+                topicElement.remove();
+                
+                // Remove from Card View DOM (if it exists)
+                const cardViewElement = document.querySelector(`#card-view-container .progress-box[data-topic-id="${topicId}"]`);
+                if (cardViewElement) {
+                    cardViewElement.closest('.topic-item').remove();
+                }
             }
             
             delete appData.completedTopics[topicId];
@@ -1328,7 +1589,8 @@
             
             // 1. Create Date Cell
             const dateCell = document.createElement('td');
-            dateCell.className = 'p-4 align-top';
+            // --- STICKY COLUMN: Added sticky classes and bg color ---
+            dateCell.className = 'p-4 align-top sticky left-0 z-10 bg-gray-800';
             dateCell.dataset.label = "Date";
             
             const dateDiv = document.createElement('div');
@@ -1388,6 +1650,12 @@
                     delete appData.completedTopics[box.dataset.topicId];
                 });
                 rowElement.remove();
+                
+                // Also remove from card view
+                if (viewToggle.checked) {
+                    renderCardView();
+                }
+                
                 saveDataToFirestore();
                 updateAllProgressBars(); 
             }
@@ -1403,7 +1671,7 @@
             const oldDate = dateDiv.dataset.originalDate;
             
             if (!row || !table || !newDate || newDate === oldDate) {
-                if (newDate !== oldDate) dateDiv.textContent = oldDate; // Revert if invalid
+                if (newDate !== oldDate && newDate !== 'New Date') dateDiv.textContent = oldDate; // Revert if invalid
                 return;
             }
             
@@ -1490,6 +1758,18 @@
          */
         function handleDragDrop(draggedElement, toCell) {
             const oldCell = draggedElement.closest('td');
+            // Find the *master* table cell if in card view
+            if (!oldCell) {
+                const topicId = draggedElement.querySelector('[data-topic-id]').dataset.topicId;
+                const originalBox = document.querySelector(`#table-view-container .progress-box[data-topic-id="${topicId}"]`);
+                if (originalBox) {
+                    oldCell = originalBox.closest('td');
+                } else {
+                    console.error("Cannot find original cell for dragged item");
+                    return;
+                }
+            }
+            
             if (oldCell === toCell) return; // Dropped in the same cell
         
             // Get info for new ID
@@ -1558,11 +1838,22 @@
             delete appData.completedTopics[oldTopicId];
             appData.completedTopics[newTopicId] = oldData;
             
-            // Update DOM
+            // Update DOM (in both views)
+            // 1. Update the dragged element's ID
             progressBox.dataset.topicId = newTopicId;
             const editIcon = draggedElement.querySelector('.edit-icon');
             if (editIcon) editIcon.dataset.topicId = newTopicId;
-            toCell.insertBefore(draggedElement, toCell.querySelector('.add-topic-btn'));
+            
+            // 2. Move element in Table View
+            const masterElement = document.querySelector(`#table-view-container .progress-box[data-topic-id="${newTopicId}"]`)?.closest('.topic-item');
+            if(masterElement) {
+                toCell.insertBefore(masterElement, toCell.querySelector('.add-topic-btn'));
+            }
+
+            // 3. Move element in Card View (if active)
+            if (viewToggle.checked) {
+                renderCardView(); // Easiest way to sync card view DOM
+            }
         
             saveDataToFirestore();
             updateProgressBarForCell(oldCell);
