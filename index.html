@@ -1508,17 +1508,4 @@
 
     </script>
 </body>
-</html>                    ['d', 'h', 'm', 's'].forEach(k => els[k].textContent = "00"); return;
-                }
-                const d = Math.floor(dist / 86400000), h = Math.floor((dist % 86400000) / 3600000),
-                      m = Math.floor((dist % 3600000) / 60000), s = Math.floor((dist % 60000) / 1000);
-                els.d.textContent = String(d).padStart(2, '0'); els.h.textContent = String(h).padStart(2, '0');
-                els.m.textContent = String(m).padStart(2, '0'); els.s.textContent = String(s).padStart(2, '0');
-            }, 1000);
-        }
-
-    </script>
-</body>
 </html>
-
-
