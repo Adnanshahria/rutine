@@ -5,55 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="google" content="notranslate" />
     <meta name="theme-color" id="theme-color-meta" content="#0f172a" />
-    <title>AS Study Dashboard v19.1 (ReLogic)</title> 
+    <title>AS Study Dashboard v19.2 (Glass)</title> 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --bg-main: #f0f4f8; --bg-card: #ffffff; --bg-header: rgba(255, 255, 255, 0.8);
+            /* Light Theme */
+            --bg-body-gradient: linear-gradient(135deg, #f0f4f8 0%, #dbeafe 100%);
+            --bg-card: rgba(255, 255, 255, 0.7);
+            --bg-card-solid: #ffffff; /* For sticky columns */
+            --bg-header: rgba(255, 255, 255, 0.6);
             --text-primary: #1e293b; --text-secondary: #334155; --text-muted: #64748b;
-            --border-primary: #e2e8f0; --border-secondary: #f1f5f9;
-            --progress-track: #e2e8f0;
+            --border-primary: rgba(255, 255, 255, 0.6); 
+            --border-secondary: rgba(226, 232, 240, 0.6);
+            --progress-track: rgba(203, 213, 225, 0.5);
             --accent: #3b82f6;
+            --shadow-card: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
         }
         html[data-theme="dark"] {
-            --bg-main: #020617; --bg-card: #0f172a; --bg-header: rgba(15, 23, 42, 0.8);
+            /* Dark Theme */
+            --bg-body-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --bg-card-solid: #1e293b; /* For sticky columns */
+            --bg-header: rgba(15, 23, 42, 0.6);
             --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
-            --border-primary: #1e293b; --border-secondary: #334155;
-            --progress-track: #1e293b;
+            --border-primary: rgba(255, 255, 255, 0.08);
+            --border-secondary: rgba(255, 255, 255, 0.05);
+            --progress-track: rgba(51, 65, 85, 0.5);
             --accent: #60a5fa;
+            --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
         
-        html, body { height: 100%; margin: 0; background: var(--bg-main); color: var(--text-primary); font-family: 'Inter', 'Noto Sans Bengali', sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; transition: background-color 0.3s ease, color 0.3s ease; }
+        html, body { height: 100%; margin: 0; background: var(--bg-body-gradient); background-attachment: fixed; color: var(--text-primary); font-family: 'Inter', 'Noto Sans Bengali', sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; transition: color 0.3s ease; }
         
         /* --- Glassmorphism & Cards --- */
         .card { 
             background: var(--bg-card); 
-            border-radius: 16px; 
-            padding: 20px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px; 
+            padding: 24px; 
+            box-shadow: var(--shadow-card);
             border: 1px solid var(--border-primary);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        html[data-theme="dark"] .card {
-            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-
+        
         .header-glass {
             background: var(--bg-header);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-primary);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
         }
 
         /* --- Progress Bars --- */
-        .progress-bar-container { background-color: var(--progress-track); border-radius: 9999px; overflow: hidden; height: 0.6rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        .progress-bar-container { background-color: var(--progress-track); border-radius: 9999px; overflow: hidden; height: 0.6rem; }
         .progress-bar { height: 100%; border-radius: 9999px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
         .progress-bar::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
             transform: translateX(-100%);
             animation: shimmer 2s infinite;
         }
@@ -68,97 +77,105 @@
         .pb-gradient-indigo { background: linear-gradient(90deg, #818cf8, #6366f1); }
 
         /* --- Subject Selector --- */
-        .subject-selector-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-        }
+        .subject-selector-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .subject-progress-btn { 
-            display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; 
+            display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer; 
             padding: 16px 10px; border-radius: 16px; 
             border: 1px solid var(--border-primary); background: var(--bg-card);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            position: relative; overflow: hidden;
         }
-        .subject-progress-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .subject-progress-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1); background: var(--border-secondary); }
         .subject-progress-btn.active { 
             border-color: var(--accent); 
             background: rgba(59, 130, 246, 0.1);
-            box-shadow: 0 0 0 2px var(--accent); 
+            box-shadow: 0 0 0 1px var(--accent); 
         }
-        html[data-theme="dark"] .subject-progress-btn.active { background: rgba(59, 130, 246, 0.15); }
-        .subject-progress-svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+        .subject-progress-svg { width: 56px; height: 56px; transform: rotate(-90deg); filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         .subject-progress-svg circle { transition: stroke-dashoffset 0.5s ease-out; }
 
         /* --- Tasks --- */
         .task-status-btn { 
             --fill: 0%; position: relative; display:inline-flex; align-items:center; justify-content:center; 
-            width: 32px; height: 32px; border-radius: 8px; 
-            border: 1px solid var(--border-secondary); background: var(--bg-main); 
+            width: 34px; height: 34px; border-radius: 10px; 
+            border: 1px solid var(--border-secondary); background: rgba(255,255,255,0.05);
             cursor: pointer; overflow: hidden; z-index: 1; transition: all 0.2s; 
             color: var(--text-secondary); font-size: 11px; font-weight: 700;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
         .task-status-btn::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--fill, 0%); background: rgba(56, 189, 248, 0.3); z-index: -1; transition: width .2s ease-out; }
         .task-status-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
-        .task-status-btn.done { background: #10b981; border-color: #059669; color: white !important; }
+        .task-status-btn.done { background: #10b981; border-color: #059669; color: white !important; text-shadow: 0 1px 1px rgba(0,0,0,0.2); }
         .task-status-btn.wont { background: #ef4444; border-color: #b91c1c; color: white !important; }
         
         /* --- Settings Panel --- */
         #settings-panel { 
-            background: var(--bg-card);
+            background: var(--bg-card-solid); /* Solid background for settings to avoid too much transparency */
             border: 1px solid var(--border-primary);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .settings-group-title {
             font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
             padding: 16px 16px 8px; font-weight: 700;
         }
 
+        /* --- Table Sticky Fix --- */
+        /* We use a solid color for sticky elements to prevent content scrolling under them from showing through */
+        th.sticky-col, td.sticky-col {
+            position: sticky; left: 0; z-index: 20;
+            background-color: var(--bg-card-solid);
+            border-right: 1px solid var(--border-secondary);
+            backdrop-filter: none; /* Disable blur on solid sticky items */
+        }
+        thead tr th { position: sticky; top: 0; background-color: var(--bg-card-solid); z-index: 10; }
+        /* Corner cell needs higher z-index */
+        thead tr th.sticky-col { z-index: 30; }
+
         /* --- Animations & Misc --- */
         .status-dot { width: 8px; height: 8px; border-radius: 50%; transition: background-color 0.3s; }
-        .modal-overlay { backdrop-filter: blur(8px); background: rgba(0,0,0,0.6); }
+        .modal-overlay { backdrop-filter: blur(5px); background: rgba(0,0,0,0.4); }
         
         /* Countdown */
         .countdown-digit { 
-            background: var(--bg-main); border: 1px solid var(--border-primary);
-            border-radius: 8px; padding: 8px 12px; font-family: 'Inter', monospace; font-weight: 700; font-size: 1.5rem;
-            min-width: 48px; text-align: center;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-primary);
+            border-radius: 12px; padding: 10px 14px; font-family: 'Inter', monospace; font-weight: 700; font-size: 1.5rem;
+            min-width: 52px; text-align: center;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
-        html[data-theme="dark"] .countdown-digit { box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
         
         /* Weight Input */
         .weight-input {
-            background: var(--bg-main); border: 1px solid var(--border-primary);
-            color: var(--text-primary); padding: 4px 8px; border-radius: 6px;
-            width: 50px; text-align: center; font-weight: 600;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-primary);
+            color: var(--text-primary); padding: 6px; border-radius: 8px;
+            width: 100%; text-align: center; font-weight: 600; font-size: 12px;
         }
+        .weight-input:focus { outline: 2px solid var(--accent); border-color: transparent; }
         
         /* Responsive */
         @media (min-width: 1024px) {
-            .main-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
-            .subject-selector-container { display: flex; flex-direction: column; gap: 16px; }
-            .subject-progress-btn { flex-direction: row; padding: 12px 16px; }
-            .subject-progress-btn div.relative { margin-right: 8px; }
+            .main-grid { display: grid; grid-template-columns: 340px 1fr; gap: 24px; align-items: start; }
+            .subject-selector-container { display: flex; flex-direction: column; gap: 12px; }
+            .subject-progress-btn { flex-direction: row; padding: 16px 20px; text-align: left; }
         }
     </style>
 </head>
 <body>
-    <div id="offline-banner" style="display:none;" class="bg-rose-600 text-white text-xs font-bold py-2 text-center fixed top-0 w-full z-50 shadow-lg">
+    <div id="offline-banner" style="display:none;" class="bg-rose-600 text-white text-xs font-bold py-2 text-center fixed top-0 w-full z-50 shadow-lg backdrop-blur-sm bg-opacity-90">
         ⚠️ অফলাইন মোড: ইন্টারনেট সংযোগ নেই। পরিবর্তনগুলো সেভ করা হচ্ছে।
     </div>
 
-    <header id="header" class="sticky top-0 z-30 w-full header-glass">
+    <header id="header" class="sticky top-0 z-40 w-full header-glass">
         <div class="w-full max-w-screen-xl mx-auto flex justify-between items-center py-3 px-4">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">AS</div>
-                <h1 class="text-lg font-bold tracking-tight">Study Dashboard <span class="text-xs font-normal text-muted px-2 py-0.5 rounded-full border border-primary bg-main">v19.1</span></h1>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">AS</div>
+                <h1 class="text-lg font-bold tracking-tight">Study Dashboard <span class="text-[10px] align-top font-normal text-muted px-2 py-0.5 rounded-full border border-primary bg-white/5">v19.2</span></h1>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2 text-xs font-medium text-muted bg-card px-3 py-1.5 rounded-full border border-primary shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 text-xs font-medium text-muted bg-white/5 px-3 py-1.5 rounded-full border border-primary">
                     <div id="connection-status" class="status-dot bg-gray-400"></div>
-                    <span id="connection-text">Offline</span>
+                    <span id="connection-text">Init...</span>
                 </div>
-                <button id="settings-btn" class="p-2 rounded-full hover:bg-border-secondary text-muted hover:text-primary transition-colors">
+                <button id="settings-btn" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 text-muted hover:text-primary transition-colors border border-transparent hover:border-primary">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0l-.1.41-1.15.3a1.75 1.75 0 00-2.3 2.3l.3 1.15-.41.1c-1.56.38-1.56 2.6 0 2.98l.41.1-.3 1.15a1.75 1.75 0 002.3 2.3l1.15-.3.1.41c.38 1.56 2.6 1.56 2.98 0l.1-.41 1.15.3c1.02.28 2.03-.2 2.3-1.15l.3-1.15.41-.1c1.56-.38 1.56-2.6 0-2.98l-.41-.1.3-1.15c.28-1.02-.2-2.03-1.15-2.3l-1.15-.3-.1-.41zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
                 </button>
             </div>
@@ -166,112 +183,107 @@
     </header>
 
     <!-- Settings Panel -->
-    <div id="settings-panel" class="hidden fixed top-16 right-4 w-80 max-w-[90vw] rounded-2xl z-40 overflow-hidden">
-        <div class="max-h-[80vh] overflow-y-auto">
+    <div id="settings-panel" class="hidden fixed top-16 right-4 w-80 max-w-[90vw] rounded-2xl z-50 overflow-hidden transform transition-all duration-200 origin-top-right">
+        <div class="max-h-[85vh] overflow-y-auto custom-scrollbar">
             <div class="settings-group-title">Preferences</div>
-            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-main transition-colors">
+            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-3">
-                    <span class="text-lg">🔊</span>
+                    <span class="text-lg opacity-70">🔊</span>
                     <div><div class="font-semibold text-sm">Sound Effects</div><div class="text-xs text-muted">Click volume</div></div>
                 </div>
-                <input type="range" id="sound-volume-slider" min="0" max="1" step="0.1" class="w-20 accent-blue-500 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <input type="range" id="sound-volume-slider" min="0" max="1" step="0.1" class="w-20 accent-blue-500 h-1 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer">
             </div>
-            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-main transition-colors">
+            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-3">
-                    <span class="text-lg">🌓</span>
+                    <span class="text-lg opacity-70">🌓</span>
                     <div><div class="font-semibold text-sm">Theme</div><div class="text-xs text-muted">Dark/Light mode</div></div>
                 </div>
-                <button id="theme-toggle-btn" class="text-xs bg-card border border-primary px-3 py-1.5 rounded-lg font-medium hover:bg-border-secondary transition-colors">Toggle</button>
+                <button id="theme-toggle-btn" class="text-xs bg-white/5 border border-primary px-3 py-1.5 rounded-lg font-medium hover:bg-white/10 transition-colors">Toggle</button>
             </div>
 
             <div class="settings-group-title">Data Management</div>
-            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-main transition-colors">
+            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-white/5 transition-colors">
                 <div class="flex items-center gap-3">
-                    <span class="text-lg">🔄</span>
+                    <span class="text-lg opacity-70">🔄</span>
                     <div><div class="font-semibold text-sm">Sync Queue</div><div class="text-xs text-muted" id="sync-status-text">0 pending</div></div>
                 </div>
-                <button id="sync-queue-btn" class="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition-colors relative">View Queue</button>
+                <button id="sync-queue-btn" class="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-500/20 transition-colors">Sync Now</button>
             </div>
-            <div class="px-4 py-3 border-b border-secondary flex gap-2 justify-end">
-                <button id="export-json-btn" class="text-xs flex-1 bg-card border border-primary py-1.5 rounded hover:bg-border-secondary">Export JSON</button>
-                <button id="import-data-btn" class="text-xs flex-1 bg-card border border-primary py-1.5 rounded hover:bg-border-secondary">Import</button>
+            <div class="px-4 py-3 border-b border-secondary flex gap-2">
+                <button id="export-json-btn" class="text-xs flex-1 bg-white/5 border border-primary py-2 rounded-lg hover:bg-white/10 transition-colors font-medium">Export JSON</button>
+                <button id="import-data-btn" class="text-xs flex-1 bg-white/5 border border-primary py-2 rounded-lg hover:bg-white/10 transition-colors font-medium">Import Data</button>
             </div>
 
-            <div class="settings-group-title flex justify-between items-center">
+            <div class="settings-group-title flex justify-between items-center sticky top-0 bg-card backdrop-blur z-10 border-b border-secondary">
                 <span>Weighted Progress Config</span>
-                <span id="weight-total-display" class="text-green-500 font-bold">100%</span>
+                <span id="weight-total-display" class="text-green-500 font-bold bg-green-500/10 px-2 py-0.5 rounded text-xs">100%</span>
             </div>
-            <div class="px-4 py-3 bg-main/50">
-                <div class="grid grid-cols-2 gap-3 text-xs">
-                    <div class="flex justify-between items-center"><span>MQB</span><input type="number" id="w-mqb" class="weight-input" value="60"></div>
-                    <div class="flex justify-between items-center"><span>Rev 1</span><input type="number" id="w-rev1" class="weight-input" value="20"></div>
-                    <div class="flex justify-between items-center"><span>Class</span><input type="number" id="w-class" class="weight-input" value="10"></div>
-                    <div class="flex justify-between items-center"><span>Rev Cls</span><input type="number" id="w-revcls" class="weight-input" value="10"></div>
+            <div class="px-4 py-3 bg-black/5 dark:bg-white/5">
+                <div id="weight-inputs-container" class="grid grid-cols-2 gap-x-3 gap-y-3 text-xs">
+                    <!-- Injected via JS -->
                 </div>
-                <button id="save-weights-btn" class="w-full mt-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition-colors">Update Weights</button>
+                <button id="save-weights-btn" class="w-full mt-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all">Save & Update Weights</button>
             </div>
         </div>
     </div>
     
     <main id="app-container" class="container max-w-screen-xl mx-auto py-6 px-4">
-        <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
-            <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <div class="text-muted font-medium animate-pulse">Loading Dashboard...</div>
+        <div id="loading-indicator" class="flex flex-col items-center justify-center py-32">
+            <div class="relative w-16 h-16">
+                <div class="absolute top-0 left-0 w-full h-full border-4 border-blue-500/30 rounded-full"></div>
+                <div class="absolute top-0 left-0 w-full h-full border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div class="text-muted font-medium mt-6 animate-pulse tracking-wide">Initializing Dashboard...</div>
         </div>
 
-        <div id="main-content-grid" class="flex flex-col gap-6" style="display: none;">
+        <div id="main-content-grid" class="flex flex-col gap-8 pb-10" style="display: none;">
             
-            <!-- Hero Section: High Level Metrics -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Hero Section -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Weighted Progress (Main) -->
-                <div class="card md:col-span-2 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">📊</div>
+                <div class="card md:col-span-2 relative overflow-hidden group">
+                    <!-- Decorative BG -->
+                    <div class="absolute -right-10 -top-10 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-colors duration-700"></div>
+                    
                     <div class="relative z-10">
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-muted mb-4 flex justify-between">
-                            Overall Weighted Progress
-                            <button class="info-btn w-5 h-5 rounded-full border border-primary flex items-center justify-center text-xs hover:bg-main" id="weighted-info-btn">?</button>
-                        </h2>
-                        <div class="flex items-end gap-4 mb-2">
-                            <span class="text-4xl font-bold text-primary" id="hero-composite-val">0.0%</span>
-                            <span class="text-sm text-muted mb-2">Total Completion</span>
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h2 class="text-xs font-bold uppercase tracking-widest text-muted mb-1">Weighted Progress</h2>
+                                <div class="text-4xl font-black tracking-tight text-primary" id="hero-composite-val">0.0%</div>
+                            </div>
+                            <button id="weighted-info-btn" class="w-8 h-8 rounded-full border border-primary flex items-center justify-center text-muted hover:text-primary hover:bg-white/10 transition-colors" title="View Calculation">
+                                <span class="font-bold font-serif italic">i</span>
+                            </button>
                         </div>
-                        <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div id="hero-composite-bar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-1000" style="width: 0%"></div>
+                        
+                        <div class="w-full h-4 bg-black/5 dark:bg-white/5 rounded-full overflow-hidden mb-6 border border-primary/50">
+                            <div id="hero-composite-bar" class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 transition-all duration-1000 relative" style="width: 0%">
+                                <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-4 gap-2 mt-4">
-                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
-                                <div class="text-[10px] text-muted font-bold">MQB</div>
-                                <div class="text-sm font-bold text-amber-500" id="hero-mqb-val">0%</div>
-                             </div>
-                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
-                                <div class="text-[10px] text-muted font-bold">REV 1</div>
-                                <div class="text-sm font-bold text-sky-500" id="hero-rev1-val">0%</div>
-                             </div>
-                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
-                                <div class="text-[10px] text-muted font-bold">CLASS</div>
-                                <div class="text-sm font-bold text-emerald-500" id="hero-class-val">0%</div>
-                             </div>
-                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
-                                <div class="text-[10px] text-muted font-bold">REV CLS</div>
-                                <div class="text-sm font-bold text-purple-500" id="hero-revcls-val">0%</div>
-                             </div>
+                        
+                        <!-- Detailed Breakdown Grid -->
+                        <div id="hero-breakdown-grid" class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                            <!-- JS Injected -->
                         </div>
                     </div>
                 </div>
 
                 <!-- Streak & Countdown -->
                 <div class="flex flex-col gap-4">
-                    <div class="card flex-1 flex flex-col justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 border-orange-200 dark:border-orange-800">
+                    <div class="card flex-1 flex flex-col justify-center items-center bg-gradient-to-br from-orange-500/5 to-red-500/5 border-orange-500/20">
                         <div class="text-center">
-                            <div class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1">Study Streak</div>
-                            <div class="text-3xl font-black text-orange-600 dark:text-orange-400 flex items-center justify-center gap-2">
-                                <span>🔥</span> <span id="streak-val">0</span> Days
+                            <div class="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-2">Current Streak</div>
+                            <div class="text-4xl font-black text-orange-500 dark:text-orange-400 flex items-center justify-center gap-2 drop-shadow-sm">
+                                <span class="animate-bounce text-3xl">🔥</span> <span id="streak-val">0</span>
                             </div>
+                            <div class="text-xs text-muted mt-1">Consecutive Days</div>
                         </div>
                     </div>
-                    <div class="card flex-1 p-4 flex flex-col justify-center">
-                        <div class="text-xs text-center font-bold text-muted uppercase mb-2">Countdown to Exam</div>
-                        <div id="countdown" class="flex justify-center gap-2">
+                    <div class="card flex-1 p-5 flex flex-col justify-center items-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/5 dark:to-black/20 pointer-events-none"></div>
+                        <div class="text-[10px] text-center font-bold text-muted uppercase tracking-widest mb-3">Time Remaining</div>
+                        <div id="countdown" class="flex justify-center gap-2 relative z-10">
                             <!-- JS Injected -->
                         </div>
                     </div>
@@ -280,74 +292,108 @@
 
             <!-- Main Workspace -->
             <div class="main-grid">
-                <!-- Left Sidebar (Desktop) / Top (Mobile) -->
-                <aside class="flex flex-col gap-4">
-                    <div class="card">
-                        <h3 class="font-bold text-sm mb-4 text-muted uppercase">Select Subject</h3>
+                <!-- Sidebar -->
+                <aside class="flex flex-col gap-6">
+                    <div class="card p-5">
+                        <h3 class="font-bold text-xs mb-4 text-muted uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-1 h-4 bg-blue-500 rounded-full"></span> Select Subject
+                        </h3>
                         <div id="subject-selector" class="subject-selector-container">
                             <!-- JS Injected -->
                         </div>
                     </div>
                     
-                    <!-- Specific Subject Stats -->
-                    <div class="card">
-                        <h3 class="font-bold text-sm mb-4 text-muted uppercase">Subject Performance</h3>
-                        <div id="selected-subject-summary" class="flex flex-col gap-4">
+                    <!-- Stats -->
+                    <div class="card p-5">
+                        <h3 class="font-bold text-xs mb-4 text-muted uppercase tracking-wider flex items-center gap-2">
+                            <span class="w-1 h-4 bg-purple-500 rounded-full"></span> Performance
+                        </h3>
+                        <div id="selected-subject-summary" class="flex flex-col gap-5">
                             <!-- JS Injected -->
                         </div>
                     </div>
                 </aside>
 
-                <!-- Right Content -->
-                <div class="flex flex-col gap-6">
-                    <!-- Syllabus Table -->
+                <!-- Content Area -->
+                <div class="flex flex-col gap-6 min-w-0">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold flex items-center gap-2">
+                            <span id="syllabus-title">Syllabus Detail</span>
+                        </h3>
+                        <div class="text-xs text-muted flex gap-4">
+                             <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-500"></span> Done</div>
+                             <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-rose-500"></span> Skip</div>
+                        </div>
+                    </div>
+                    
                     <section id="syllabus-container" class="flex flex-col gap-4">
-                        <!-- JS Injected Details/Summary -->
+                        <!-- JS Injected -->
                     </section>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Modals -->
-    <div id="info-modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay p-4">
-        <div class="bg-card w-full max-w-md rounded-2xl p-6 shadow-2xl border border-primary transform transition-all scale-100">
-            <h3 id="info-modal-title" class="text-xl font-bold mb-2">Info</h3>
-            <p id="info-modal-desc" class="text-muted text-sm mb-4"></p>
-            <div class="bg-main p-3 rounded-lg border border-primary mb-4">
-                <div class="text-xs font-bold text-muted mb-2 uppercase">Includes Items:</div>
-                <ul id="info-modal-items" class="text-sm space-y-1 pl-2"></ul>
+    <!-- Info Modal -->
+    <div id="info-modal-overlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center modal-overlay p-4 transition-opacity duration-300">
+        <div class="bg-card-solid w-full max-w-md rounded-2xl p-6 shadow-2xl border border-primary transform transition-all scale-100">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="info-modal-title" class="text-xl font-bold">Weighted Calculation</h3>
+                <button id="info-modal-close-btn" class="text-muted hover:text-primary">✕</button>
             </div>
-            <button id="info-modal-close" class="w-full py-2.5 bg-primary text-primary-foreground bg-slate-800 text-white rounded-xl font-medium hover:bg-slate-700 transition-colors">Close</button>
+            <p class="text-muted text-sm mb-4 leading-relaxed">Your overall progress is calculated based on the custom weights assigned to each study item below:</p>
+            
+            <div class="bg-black/5 dark:bg-white/5 rounded-xl overflow-hidden border border-primary mb-6">
+                <div class="grid grid-cols-3 bg-black/5 dark:bg-white/10 text-[10px] uppercase font-bold text-muted p-2 border-b border-secondary">
+                    <div class="col-span-2">Item</div>
+                    <div class="text-right">Weight</div>
+                </div>
+                <div id="info-weights-list" class="max-h-48 overflow-y-auto">
+                    <!-- JS Injected -->
+                </div>
+                <div class="flex justify-between p-3 bg-blue-500/10 border-t border-primary font-bold text-xs">
+                    <span>Total</span>
+                    <span class="text-blue-500">100%</span>
+                </div>
+            </div>
+            
+            <button id="info-modal-close" class="w-full py-2.5 bg-secondary hover:bg-border-secondary text-primary rounded-xl font-medium transition-colors border border-primary">Got it</button>
         </div>
     </div>
 
-    <div id="note-modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay p-4">
-        <div class="bg-card w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-primary">
-            <h3 id="note-modal-title" class="text-lg font-bold mb-3">Edit Note</h3>
-            <textarea id="note-textarea" class="w-full h-32 bg-main border border-primary rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-none" placeholder="Write your study notes here..."></textarea>
-            <div class="flex gap-3 mt-4">
-                <button id="note-modal-clear" class="px-4 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors">Delete</button>
+    <!-- Note Modal -->
+    <div id="note-modal-overlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center modal-overlay p-4">
+        <div class="bg-card-solid w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-primary relative overflow-hidden">
+            <!-- Glow effect -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+            
+            <h3 class="text-lg font-bold mb-1">Study Note</h3>
+            <p class="text-xs text-muted mb-4" id="note-modal-subtitle">Add details or reminders for this chapter.</p>
+            
+            <textarea id="note-textarea" class="w-full h-40 bg-main border border-primary rounded-xl p-4 text-sm focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all resize-none leading-relaxed shadow-inner" placeholder="Type your note here..."></textarea>
+            
+            <div class="flex gap-3 mt-5">
+                <button id="note-modal-clear" class="px-4 py-2 text-xs font-medium text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20">Clear Note</button>
                 <div class="flex-grow"></div>
-                <button id="note-modal-cancel" class="px-4 py-2 text-sm text-muted hover:text-primary transition-colors">Cancel</button>
-                <button id="note-modal-save" class="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all">Save Note</button>
+                <button id="note-modal-cancel" class="px-5 py-2 text-xs font-medium text-muted hover:text-primary transition-colors">Cancel</button>
+                <button id="note-modal-save" class="px-6 py-2 text-xs bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all">Save Note</button>
             </div>
         </div>
     </div>
 
     <div id="import-file-input-container" class="hidden"><input type="file" id="import-file-input" accept=".json"></div>
-    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-max max-w-[90vw]"></div>
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 w-80 pointer-events-none"></div>
 
     <script type="module">
-        // Firebase Config
+        // --- Firebase Configuration ---
         const FIRESTORE_USER_ID = 'as19';
         const firebaseConfig = {"apiKey":"AIzaSyDTLhIkrW9qk6KPT_gTDibIiJeVwWYTowk","authDomain":"my-study-dashboard.firebaseapp.com","projectId":"my-study-dashboard","storageBucket":"my-study-dashboard.appspot.com","messagingSenderId":"66307909031","appId":"1:66307909031:web:9e724a43c8c11a0ef80282"};
         
-        // Globals for Firebase
+        // Globals
         let app, db, userDocRef;
         let initializeApp, getFirestore, doc, onSnapshot, setDoc;
 
-        // --- Syllabus Config ---
+        // --- Data & Config ---
         const syllabusData = { 
             biology: { name: "Biology", icon: "🧬", chapters: [ 
                 { id: 1, name: "Cell & Structure", paper: 1 }, { id: 2, name: "Cell Division", paper: 1 }, { id: 3, name: "Cell Chemistry", paper: 1 }, { id: 4, name: "Microorganisms", paper: 1 }, { id: 5, name: "Algae & Fungi", paper: 1 }, { id: 6, name: "Bryophyta & Pteridophyta", paper: 1 }, { id: 7, name: "Gymnosperms & Angiosperms", paper: 1 }, { id: 8, name: "Tissue System", paper: 1 }, { id: 9, name: "Plant Physiology", paper: 1 }, { id: 10, name: "Plant Reproduction", paper: 1 }, { id: 11, name: "Biotechnology", paper: 1 }, { id: 12, name: "Environment & Conservation", paper: 1 }, 
@@ -362,9 +408,13 @@
                 { id: 11, name: "Thermodynamics", paper: 2 }, { id: 12, name: "Electrostatics", paper: 2 }, { id: 13, name: "Current Electricity", paper: 2 }, { id: 14, name: "Magnetic Effects", paper: 2 }, { id: 15, name: "EMI", paper: 2 }, { id: 16, name: "Geometrical Optics", paper: 2 }, { id: 17, name: "Physical Optics", paper: 2 }, { id: 18, name: "Modern Physics", paper: 2 }, { id: 19, name: "Atomic Model", paper: 2 }, { id: 20, name: "Semiconductors", paper: 2 }, { id: 21, name: "Astronomy", paper: 2 } 
             ] } 
         };
+        
+        // 12 Trackable Items
         const trackableItems = ["Main Book", "Class", "Rev Class", "Meditrics", "MQB", "Retina QB", "SF Exam", "Daily Exam", "Weekly Exam", "Campus Exam", "Rev 1", "Rev 2"];
         
-        // --- State Management ---
+        // Helper to create ID safe keys from item names
+        const getItemKey = (name) => name.replace(/\s+/g, '').toLowerCase();
+        
         const state = { 
             userData: {}, 
             activeSubject: 'biology', 
@@ -372,11 +422,17 @@
             settings: { 
                 theme: 'dark', 
                 soundVolume: 0.3, 
-                weights: { mqb: 60, rev1: 20, class: 10, revClass: 10 } // Default weights
+                weights: { 
+                    // Defaults
+                    mainbook: 0, class: 10, revclass: 10, meditrics: 0,
+                    mqb: 40, retinaqb: 0,
+                    sfexam: 0, dailyexam: 0, weeklyexam: 0, campusexam: 0,
+                    rev1: 20, rev2: 20
+                } 
             } 
         };
         
-        // --- Database (IndexedDB) Wrapper ---
+        // --- Database Wrapper ---
         let idb;
         const DB_NAME = 'AS_Study_DB_v1';
         function openDB() { return new Promise((resolve, reject) => { const r = indexedDB.open(DB_NAME, 1); r.onerror = () => reject(r.error); r.onsuccess = () => { idb = r.result; resolve(idb); }; r.onupgradeneeded = (e) => { const db = e.target.result; if (!db.objectStoreNames.contains('userData')) db.createObjectStore('userData', { keyPath: 'id' }); if (!db.objectStoreNames.contains('pendingWrites')) db.createObjectStore('pendingWrites', { keyPath: 'key' }); }; }); }
@@ -385,52 +441,26 @@
         async function dbGetAll(store) { if (!idb) return []; return new Promise(r => { const tx = idb.transaction(store, 'readonly').objectStore(store).getAll(); tx.onsuccess = () => r(tx.result); tx.onerror = () => r([]); }); }
         async function dbClear(store) { if (!idb) return; return new Promise((resolve, reject) => { const tx = idb.transaction(store, 'readwrite'); tx.oncomplete = resolve; tx.onerror = reject; tx.objectStore(store).clear(); }); }
 
-        // --- Core Logic ---
+        // --- Calculation Logic ---
         const getPercent = (status) => (status >= 0 && status <= 5) ? status * 20 : 0;
         const normalize = (raw) => raw <= 0 ? 0 : Math.min(100, (raw / 80) * 100);
 
         function calculateProgress(subjectKey, itemNames) {
             const subject = syllabusData[subjectKey];
             if (!subject) return { overall: 0, p1: 0, p2: 0 };
+            const targetIndices = itemNames.map(n => trackableItems.indexOf(n)).filter(i => i !== -1);
             
-            // Use set for O(1) lookup
-            const targetIndices = new Set(itemNames.map(n => trackableItems.indexOf(n)).filter(i => i !== -1));
+            // Special Logic: Physics ignores Main Book if explicit, but here we keep generic logic for summaries
+            // If calculateProgress is called with specific items, we strictly calculate those.
             
-            // Special Logic Handling
-            const mainBookIdx = trackableItems.indexOf("Main Book");
-            const meditricsIdx = trackableItems.indexOf("Meditrics");
-            const isPhysics = subjectKey === 'physics';
-            const useMaxLogic = targetIndices.has(mainBookIdx) && targetIndices.has(meditricsIdx);
-
             let p1Total = 0, p1Count = 0, p2Total = 0, p2Count = 0;
 
             subject.chapters.forEach(ch => {
                 let chapterSum = 0;
-                let validItemCount = 0;
-
-                if (useMaxLogic) {
-                    // Special Case: Max(MainBook, Meditrics)
-                    const sMain = getPercent(state.userData[`s_${subjectKey}_${ch.id}_${mainBookIdx}`] ?? 0);
-                    const sMed = getPercent(state.userData[`s_${subjectKey}_${ch.id}_${meditricsIdx}`] ?? 0);
-                    chapterSum += Math.max(sMain, sMed);
-                    validItemCount++;
-                    
-                    targetIndices.forEach(idx => {
-                        if (idx !== mainBookIdx && idx !== meditricsIdx) {
-                            if (isPhysics && idx === mainBookIdx) return; // Skip main book for physics if accidentally included
-                            chapterSum += getPercent(state.userData[`s_${subjectKey}_${ch.id}_${idx}`] ?? 0);
-                            validItemCount++;
-                        }
-                    });
-                } else {
-                    targetIndices.forEach(idx => {
-                        if (isPhysics && idx === mainBookIdx) return;
-                        chapterSum += getPercent(state.userData[`s_${subjectKey}_${ch.id}_${idx}`] ?? 0);
-                        validItemCount++;
-                    });
-                }
-
-                const chAvg = validItemCount > 0 ? normalize(chapterSum / validItemCount) : 0;
+                targetIndices.forEach(idx => {
+                    chapterSum += getPercent(state.userData[`s_${subjectKey}_${ch.id}_${idx}`] ?? 0);
+                });
+                const chAvg = targetIndices.length > 0 ? normalize(chapterSum / targetIndices.length) : 0;
                 if (ch.paper === 1) { p1Total += chAvg; p1Count++; } else { p2Total += chAvg; p2Count++; }
             });
 
@@ -442,24 +472,38 @@
         }
 
         function calculateGlobalComposite() {
-            // Default weights if settings are missing or corrupted
-            const w = state.settings.weights || { mqb: 60, rev1: 20, class: 10, revClass: 10 };
-            const totalWeight = w.mqb + w.rev1 + w.class + w.revClass;
-            // Avoid division by zero
-            if (totalWeight === 0) return { composite: 0, mqbVal: 0, rev1Val: 0, classVal: 0, revClsVal: 0 };
-
+            const w = state.settings.weights || {};
             const subjects = Object.keys(syllabusData);
-            const getAvg = (items) => subjects.reduce((acc, s) => acc + calculateProgress(s, items).overall, 0) / subjects.length;
+            
+            // Helper to get global average for a single item type
+            const getGlobalItemAvg = (item) => {
+                let sum = 0;
+                subjects.forEach(s => {
+                    const p = calculateProgress(s, [item]);
+                    sum += p.overall;
+                });
+                return sum / subjects.length;
+            };
 
-            const mqbVal = getAvg(["MQB"]);
-            const rev1Val = getAvg(["Rev 1"]);
-            const classVal = getAvg(["Class"]);
-            const revClsVal = getAvg(["Rev Class"]);
+            let totalWeightedScore = 0;
+            let totalWeight = 0;
+            let breakdown = {};
 
-            // Weighted Formula
-            const composite = ((mqbVal * w.mqb) + (rev1Val * w.rev1) + (classVal * w.class) + (revClsVal * w.revClass)) / totalWeight;
+            trackableItems.forEach(item => {
+                const key = getItemKey(item);
+                const weight = w[key] || 0;
+                const avg = getGlobalItemAvg(item);
+                
+                breakdown[key] = { name: item, val: avg, weight: weight };
+                
+                if (weight > 0) {
+                    totalWeightedScore += avg * weight;
+                    totalWeight += weight;
+                }
+            });
 
-            return { composite, mqbVal, rev1Val, classVal, revClsVal };
+            const composite = totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
+            return { composite, breakdown, totalWeight };
         }
 
         function getStreak() {
@@ -474,7 +518,8 @@
             const today = new Date().toLocaleDateString('en-CA');
             const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('en-CA');
             
-            if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0; // Streak broken
+            // Allow streak to continue if studied today OR yesterday
+            if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0; 
 
             let streak = 1;
             let current = new Date(uniqueDates[0]);
@@ -496,40 +541,60 @@
             // Animate Values
             document.getElementById('hero-composite-val').textContent = data.composite.toFixed(1) + '%';
             document.getElementById('hero-composite-bar').style.width = data.composite.toFixed(1) + '%';
-            
-            document.getElementById('hero-mqb-val').textContent = data.mqbVal.toFixed(0) + '%';
-            document.getElementById('hero-rev1-val').textContent = data.rev1Val.toFixed(0) + '%';
-            document.getElementById('hero-class-val').textContent = data.classVal.toFixed(0) + '%';
-            document.getElementById('hero-revcls-val').textContent = data.revClsVal.toFixed(0) + '%';
-
             document.getElementById('streak-val').textContent = streak;
+            
+            // Render Breakdown Grid
+            const grid = document.getElementById('hero-breakdown-grid');
+            grid.innerHTML = '';
+            
+            // Sort by weight high to low for display
+            const sortedItems = Object.values(data.breakdown).sort((a, b) => b.weight - a.weight);
+            
+            sortedItems.forEach(item => {
+                const div = el('div', 'flex flex-col items-center justify-center bg-main rounded-lg p-2 border border-primary');
+                div.innerHTML = `
+                    <div class="text-[9px] text-muted font-bold uppercase truncate w-full text-center">${item.name}</div>
+                    <div class="text-sm font-bold ${item.val > 0 ? 'text-blue-500' : 'text-gray-400'}">${item.val.toFixed(0)}%</div>
+                    <div class="text-[9px] ${item.weight > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-300 dark:text-gray-700'} font-medium">${item.weight}% w</div>
+                `;
+                grid.appendChild(div);
+            });
         }
 
         function renderSubjectSelector() {
             const container = document.getElementById('subject-selector');
             container.innerHTML = '';
-            const colors = ['#10b981', '#f59e0b', '#3b82f6']; // Mint, Amber, Blue
+            const colors = ['#10b981', '#f59e0b', '#3b82f6'];
             
             Object.entries(syllabusData).forEach(([key, data], idx) => {
+                // Simple progress estimate
                 const prog = calculateProgress(key, ["Main Book", "Class", "Meditrics"]);
                 const color = colors[idx % 3];
                 const isActive = state.activeSubject === key;
                 
                 const btn = el('div', `subject-progress-btn ${isActive ? 'active' : ''}`);
-                btn.onclick = () => { state.activeSubject = key; renderSyllabus(); renderSubjectSummary(); renderSubjectSelector(); };
+                btn.onclick = () => { 
+                    if(state.activeSubject === key) return;
+                    state.activeSubject = key; 
+                    renderSyllabus(); 
+                    renderSubjectSummary(); 
+                    renderSubjectSelector(); 
+                };
                 
-                // SVG Circle
-                const r = 22; const c = 2 * Math.PI * r;
+                const r = 24; const c = 2 * Math.PI * r;
                 const offset = c - ((prog.overall / 100) * c);
                 
                 btn.innerHTML = `
-                    <div class="relative w-[52px] h-[52px]">
-                        <svg class="subject-progress-svg w-full h-full"><circle cx="26" cy="26" r="${r}" stroke="var(--progress-track)" stroke-width="4" fill="none"/><circle cx="26" cy="26" r="${r}" stroke="${color}" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"/></svg>
+                    <div class="relative w-[56px] h-[56px] flex-shrink-0">
+                        <svg class="subject-progress-svg w-full h-full"><circle cx="28" cy="28" r="${r}" stroke="var(--progress-track)" stroke-width="5" fill="none"/><circle cx="28" cy="28" r="${r}" stroke="${color}" stroke-width="5" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"/></svg>
                         <div class="absolute inset-0 flex items-center justify-center font-bold text-xs">${prog.overall.toFixed(0)}%</div>
                     </div>
-                    <div class="text-center lg:text-left">
-                        <div class="text-xl mb-1">${data.icon}</div>
-                        <div class="font-bold text-sm leading-tight">${data.name}</div>
+                    <div class="flex flex-col justify-center">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-lg">${data.icon}</span>
+                            <span class="font-bold text-sm">${data.name}</span>
+                        </div>
+                        <div class="text-[10px] text-muted">Click to view syllabus</div>
                     </div>
                 `;
                 container.appendChild(btn);
@@ -544,50 +609,58 @@
                 const p = calculateProgress(key, items);
                 return `
                     <div>
-                        <div class="flex justify-between text-xs font-semibold mb-1"><span>${label}</span><span>${p.overall.toFixed(1)}%</span></div>
-                        <div class="progress-bar-container h-2"><div class="progress-bar ${colorClass}" style="width: ${p.overall}%"></div></div>
-                        <div class="flex justify-between text-[10px] text-muted mt-1 px-0.5"><span>P1: ${p.p1.toFixed(0)}%</span><span>P2: ${p.p2.toFixed(0)}%</span></div>
+                        <div class="flex justify-between text-xs font-semibold mb-1.5 tracking-wide"><span>${label}</span><span class="text-primary">${p.overall.toFixed(1)}%</span></div>
+                        <div class="progress-bar-container"><div class="progress-bar ${colorClass}" style="width: ${p.overall}%"></div></div>
+                        <div class="flex justify-between text-[10px] text-muted mt-1 opacity-80"><span>Paper 1: ${p.p1.toFixed(0)}%</span><span>Paper 2: ${p.p2.toFixed(0)}%</span></div>
                     </div>
                 `;
             };
 
             container.innerHTML = `
-                ${createBar("Main Study", ["Main Book", "Class", "Meditrics"], "pb-gradient-sky")}
-                ${createBar("Exams", ["SF Exam", "Daily Exam", "Weekly Exam"], "pb-gradient-rose")}
-                ${createBar("Question Banks", ["MQB", "Retina QB"], "pb-gradient-peach")}
+                ${createBar("Core Study (Book, Class, Meditrics)", ["Main Book", "Class", "Meditrics"], "pb-gradient-sky")}
+                ${createBar("Exams (Daily, Weekly, SF, Campus)", ["SF Exam", "Daily Exam", "Weekly Exam", "Campus Exam"], "pb-gradient-rose")}
+                ${createBar("Practice (Q-Banks)", ["MQB", "Retina QB"], "pb-gradient-peach")}
             `;
         }
 
         function renderSyllabus() {
             const container = document.getElementById('syllabus-container');
+            const titleEl = document.getElementById('syllabus-title');
             container.innerHTML = '';
-            const subject = syllabusData[state.activeSubject];
             
-            // Group by Paper
+            const subject = syllabusData[state.activeSubject];
+            titleEl.innerHTML = `${subject.icon} ${subject.name} Syllabus`;
+            
             const p1Chapters = subject.chapters.filter(c => c.paper === 1);
             const p2Chapters = subject.chapters.filter(c => c.paper === 2);
 
             [p1Chapters, p2Chapters].forEach((chapters, idx) => {
                 const paperNum = idx + 1;
-                const paperStats = calculateProgress(state.activeSubject, ["Main Book", "Class", "Meditrics"]); // Just for summary
+                const paperStats = calculateProgress(state.activeSubject, ["Main Book", "Class", "Meditrics"]);
                 const pVal = paperNum === 1 ? paperStats.p1 : paperStats.p2;
                 
-                const details = el('details', 'group bg-card border border-primary rounded-xl overflow-hidden transition-all');
-                const isOpen = state.syllabusOpenState[`${state.activeSubject}-p${paperNum}`] !== false; // Default open
+                const details = el('details', 'group bg-card border border-primary rounded-2xl overflow-hidden transition-all shadow-sm');
+                const isOpen = state.syllabusOpenState[`${state.activeSubject}-p${paperNum}`] !== false;
                 if (isOpen) details.open = true;
                 
                 details.ontoggle = (e) => { state.syllabusOpenState[`${state.activeSubject}-p${paperNum}`] = details.open; };
 
                 details.innerHTML = `
-                    <summary class="flex items-center justify-between p-4 cursor-pointer bg-main/50 hover:bg-main transition-colors select-none">
-                        <div class="font-bold text-base">Paper ${paperNum} <span class="text-muted text-sm font-normal ml-2">(${pVal.toFixed(0)}%)</span></div>
-                        <div class="text-xl group-open:rotate-180 transition-transform">⌄</div>
+                    <summary class="flex items-center justify-between p-5 cursor-pointer bg-white/5 hover:bg-white/10 transition-colors select-none backdrop-blur-md">
+                        <div class="font-bold text-base flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-serif font-bold italic">P${paperNum}</span>
+                            Paper ${paperNum} 
+                            <span class="text-xs font-normal text-muted bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded ml-1">${pVal.toFixed(0)}% Done</span>
+                        </div>
+                        <div class="w-8 h-8 rounded-full border border-primary flex items-center justify-center group-open:bg-primary group-open:text-white group-open:border-transparent transition-all transform group-open:rotate-180">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        </div>
                     </summary>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[800px]">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[900px]">
                             <thead>
-                                <tr class="text-xs text-muted border-b border-secondary">
-                                    <th class="p-3 pl-4 w-48 sticky left-0 bg-card z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Chapter</th>
+                                <tr class="text-[10px] uppercase tracking-wider text-muted border-b border-secondary">
+                                    <th class="p-3 pl-5 w-56 sticky-col shadow-[4px_0_8px_rgba(0,0,0,0.02)]">Chapter</th>
                                     ${trackableItems.map(t => `<th class="p-3 text-center min-w-[60px]">${t}</th>`).join('')}
                                 </tr>
                             </thead>
@@ -596,9 +669,9 @@
                                     let tds = trackableItems.map((item, i) => {
                                         const key = `s_${state.activeSubject}_${ch.id}_${i}`;
                                         const val = state.userData[key] ?? 0;
-                                        const hasNote = !!state.userData[`note_${key}`];
+                                        const noteKey = `note_${key}`;
+                                        const hasNote = !!state.userData[noteKey];
                                         
-                                        // Determine button visual state
                                         let btnClass = 'task-status-btn';
                                         let fill = 0;
                                         let label = (val * 20) + '%';
@@ -608,16 +681,21 @@
                                         else { fill = val * 20; }
 
                                         return `
-                                            <td class="p-2 text-center">
-                                                <div class="flex justify-center gap-1">
+                                            <td class="p-2 text-center relative group/cell">
+                                                <div class="flex flex-col items-center justify-center gap-1">
                                                     <button class="${btnClass}" data-key="${key}" style="--fill:${fill}%"><span>${label}</span></button>
-                                                    ${hasNote ? `<button class="text-[10px] w-4 h-4 rounded bg-blue-100 text-blue-600 flex items-center justify-center note-trigger" data-key="${key}">📝</button>` : `<button class="text-[10px] w-4 h-4 rounded hover:bg-secondary text-muted/30 hover:text-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity note-trigger" data-key="${key}">+</button>`}
+                                                    ${hasNote 
+                                                        ? `<button class="note-trigger absolute top-0 right-0 translate-x-1/3 -translate-y-1/3 w-4 h-4 rounded-full bg-blue-500 text-white shadow-sm flex items-center justify-center text-[8px] z-10 hover:scale-110 transition-transform" data-key="${key}">📝</button>`
+                                                        : `<button class="note-trigger w-full h-3 mt-0.5 text-[10px] text-muted/20 hover:text-blue-400 flex items-center justify-center transition-colors" data-key="${key}">+</button>`
+                                                    }
                                                 </div>
                                             </td>`;
                                     }).join('');
                                     
-                                    return `<tr class="border-b border-secondary hover:bg-main/30 group">
-                                        <td class="p-3 pl-4 font-medium sticky left-0 bg-card z-10 border-r border-secondary">${ch.name}</td>
+                                    return `<tr class="border-b border-secondary hover:bg-white/5 transition-colors">
+                                        <td class="p-3 pl-5 font-medium sticky-col text-xs md:text-sm shadow-[4px_0_8px_rgba(0,0,0,0.02)]">
+                                            <span class="line-clamp-2" title="${ch.name}">${ch.name}</span>
+                                        </td>
                                         ${tds}
                                     </tr>`;
                                 }).join('')}
@@ -628,20 +706,44 @@
                 container.appendChild(details);
             });
         }
+        
+        // --- Render Settings Weights ---
+        function renderWeightInputs() {
+            const container = document.getElementById('weight-inputs-container');
+            container.innerHTML = '';
+            const w = state.settings.weights || {};
+            
+            trackableItems.forEach(item => {
+                const key = getItemKey(item);
+                const val = w[key] ?? 0;
+                
+                const div = el('div', 'flex items-center justify-between bg-main p-2 rounded border border-secondary');
+                div.innerHTML = `
+                    <span class="truncate mr-2 font-medium">${item}</span>
+                    <div class="flex items-center">
+                        <input type="number" class="weight-input" data-key="${key}" value="${val}" min="0" max="100">
+                        <span class="ml-1 text-muted">%</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            
+            // Add listener
+            container.querySelectorAll('input').forEach(inp => inp.addEventListener('input', validateWeights));
+            validateWeights();
+        }
 
-        // --- Interaction Handlers ---
+        // --- Logic ---
         async function updateTaskStatus(key) {
             const current = state.userData[key] ?? 0;
             const next = (current + 1) % 7;
             
-            // Optimistic Update
             state.userData[key] = next;
             state.userData[`timestamp_${key}`] = new Date().toISOString();
             
-            // Re-render appropriate parts
+            // Optimistic UI
             const btn = document.querySelector(`button[data-key="${key}"]`);
             if (btn) {
-                // Fast DOM update for responsiveness
                 let fill = 0; let label = (next * 20) + '%';
                 btn.className = 'task-status-btn';
                 if (next === 5) { btn.classList.add('done'); label = '✓'; fill = 100; }
@@ -651,18 +753,18 @@
                 btn.querySelector('span').textContent = label;
             }
 
-            // Recalculate summaries
             renderHero();
             renderSubjectSelector(); 
-            renderSubjectSummary();
+            renderSubjectSummary(); // Update stats immediately
 
-            // Persist
             await queueWrite(key, next);
             await queueWrite(`timestamp_${key}`, state.userData[`timestamp_${key}`]);
-            sync();
+            
+            // Debounce sync
+            if (window.syncTimeout) clearTimeout(window.syncTimeout);
+            window.syncTimeout = setTimeout(sync, 2000);
         }
 
-        // --- Sync Engine ---
         async function queueWrite(key, value) {
             await dbPut('userData', { id: 'main', value: state.userData });
             await dbPut('pendingWrites', { key, value });
@@ -671,75 +773,73 @@
 
         async function sync() {
             if (!navigator.onLine) return;
+            if (!userDocRef || !setDoc) return; // Safety check
+
             const pending = await dbGetAll('pendingWrites');
             if (!pending.length) return;
 
             const statusDot = document.getElementById('connection-status');
-            const statusText = document.getElementById('connection-text');
             statusDot.className = 'status-dot bg-yellow-400 animate-pulse';
-            statusText.textContent = 'Syncing...';
+            document.getElementById('connection-text').textContent = 'Syncing...';
 
             try {
-                if (app && userDocRef) {
-                    const updateObj = {};
-                    pending.forEach(p => updateObj[p.key] = p.value);
-                    
-                    await setDoc(userDocRef, updateObj, { merge: true });
-                    await dbClear('pendingWrites');
-                    
-                    statusDot.className = 'status-dot bg-green-500';
-                    statusText.textContent = 'Online';
-                    updateSyncUI();
-                }
+                const updateObj = {};
+                pending.forEach(p => updateObj[p.key] = p.value);
+                
+                await setDoc(userDocRef, updateObj, { merge: true });
+                await dbClear('pendingWrites');
+                
+                statusDot.className = 'status-dot bg-green-500';
+                document.getElementById('connection-text').textContent = 'Online';
+                updateSyncUI();
+                showToast('✅ Synced successfully');
             } catch (e) {
                 console.error("Sync failed", e);
                 statusDot.className = 'status-dot bg-red-500';
-                statusText.textContent = 'Error';
+                document.getElementById('connection-text').textContent = 'Error';
             }
         }
 
         async function updateSyncUI() {
             const pending = await dbGetAll('pendingWrites');
             const count = pending.length;
-            document.getElementById('sync-status-text').textContent = `${count} pending changes`;
-            if(count > 0) document.getElementById('sync-queue-btn').classList.remove('hidden');
+            document.getElementById('sync-status-text').textContent = `${count} pending`;
+            const btn = document.getElementById('sync-queue-btn');
+            if (count > 0) {
+                btn.classList.remove('hidden');
+                btn.textContent = `Sync (${count})`;
+            } else {
+                btn.textContent = "Synced";
+            }
         }
 
+        // --- Initialization ---
         async function init() {
-            // 1. Load Local Config & Data
             try {
                 await openDB();
                 const cached = await dbGet('userData', 'main');
                 if (cached) state.userData = cached.value;
                 
-                // Load Settings
                 const settings = await dbGet('userData', 'settings');
                 if (settings) state.settings = { ...state.settings, ...settings.value };
                 
-                // Apply Theme
                 applyTheme(state.settings.theme);
                 document.getElementById('sound-volume-slider').value = state.settings.soundVolume;
                 
-                // Load Weights into inputs
-                if(state.settings.weights) {
-                    document.getElementById('w-mqb').value = state.settings.weights.mqb;
-                    document.getElementById('w-rev1').value = state.settings.weights.rev1;
-                    document.getElementById('w-class').value = state.settings.weights.class;
-                    document.getElementById('w-revcls').value = state.settings.weights.revClass;
-                }
+            } catch (e) { console.error("Local Init Error", e); }
 
-            } catch (e) { console.error("Local load error", e); }
-
-            // 2. Initial Render
+            // Render App
+            renderWeightInputs();
             renderHero();
             renderSubjectSelector();
             renderSubjectSummary();
             renderSyllabus();
             startCountdown();
+            
             document.getElementById('loading-indicator').style.display = 'none';
             document.getElementById('main-content-grid').style.display = 'flex';
 
-            // 3. Dynamic Firebase Import (Prevents SyntaxError if offline)
+            // Firebase Load
             try {
                 const fbApp = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
                 const fbFirestore = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
@@ -750,76 +850,168 @@
                 onSnapshot = fbFirestore.onSnapshot;
                 setDoc = fbFirestore.setDoc;
 
-                // Init Firebase
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 userDocRef = doc(db, "users", FIRESTORE_USER_ID);
                 
-                const statusDot = document.getElementById('connection-status');
-                const statusText = document.getElementById('connection-text');
-                statusDot.className = 'status-dot bg-green-500';
-                statusText.textContent = 'Online';
+                document.getElementById('connection-status').className = 'status-dot bg-green-500';
+                document.getElementById('connection-text').textContent = 'Online';
 
                 onSnapshot(userDocRef, (snap) => {
                     if (snap.exists()) {
                         const remoteData = snap.data();
+                        // Basic merge strategy: remote wins if loaded later
+                        const needsRender = JSON.stringify(state.userData) !== JSON.stringify({...state.userData, ...remoteData});
+                        
                         state.userData = { ...state.userData, ...remoteData };
                         if(remoteData.settings_weights) {
                              state.settings.weights = remoteData.settings_weights;
-                             renderHero();
+                             renderWeightInputs();
                         }
+                        
                         dbPut('userData', { id: 'main', value: state.userData });
-                        renderSyllabus();
-                        renderHero();
+                        
+                        if(needsRender) {
+                            renderHero();
+                            renderSyllabus(); 
+                        }
                     }
-                }, (err) => {
-                    console.warn("Offline/Permission Error", err);
-                    statusDot.className = 'status-dot bg-red-500';
-                    statusText.textContent = 'Error';
                 });
             } catch (e) { 
-                console.warn("Firebase load failed (Offline Mode Active)", e); 
+                console.warn("Firebase Offline", e); 
+                document.getElementById('connection-status').className = 'status-dot bg-gray-400';
+                document.getElementById('connection-text').textContent = 'Offline Mode';
             }
 
-            // 4. Event Listeners
+            // Events
+            setupEvents();
+        }
+        
+        function setupEvents() {
             window.addEventListener('online', sync);
             window.addEventListener('offline', () => document.getElementById('offline-banner').style.display = 'block');
             
+            // Delegation
             document.body.addEventListener('click', (e) => {
                 const btn = e.target.closest('button');
                 if (!btn) return;
 
-                // Sound Effect
                 if (state.settings.soundVolume > 0 && (btn.classList.contains('task-status-btn') || btn.classList.contains('subject-progress-btn'))) {
+                    // Simple beep
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.connect(gain); gain.connect(ctx.destination);
-                    osc.frequency.value = 800; gain.gain.value = state.settings.soundVolume * 0.1;
-                    osc.start(); osc.stop(ctx.currentTime + 0.05);
+                    osc.frequency.value = 600; 
+                    gain.gain.setValueAtTime(state.settings.soundVolume * 0.05, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                    osc.start(); osc.stop(ctx.currentTime + 0.1);
                 }
 
-                if (btn.classList.contains('task-status-btn')) {
-                    updateTaskStatus(btn.dataset.key);
-                }
-                if (btn.classList.contains('note-trigger')) {
-                    openNoteModal(btn.dataset.key);
-                }
+                if (btn.classList.contains('task-status-btn')) updateTaskStatus(btn.dataset.key);
+                if (btn.classList.contains('note-trigger')) openNoteModal(btn.dataset.key);
             });
             
+            // Settings UI
             document.getElementById('settings-btn').onclick = () => document.getElementById('settings-panel').classList.toggle('hidden');
+            
             document.getElementById('theme-toggle-btn').onclick = () => {
-                const newTheme = state.settings.theme === 'dark' ? 'light' : 'dark';
-                state.settings.theme = newTheme;
-                applyTheme(newTheme);
+                const t = state.settings.theme === 'dark' ? 'light' : 'dark';
+                state.settings.theme = t;
+                applyTheme(t);
                 dbPut('userData', { id: 'settings', value: state.settings });
             };
-            document.getElementById('save-weights-btn').onclick = saveWeights;
+
+            document.getElementById('sound-volume-slider').onchange = (e) => {
+                state.settings.soundVolume = parseFloat(e.target.value);
+                dbPut('userData', { id: 'settings', value: state.settings });
+            };
+
+            document.getElementById('sync-queue-btn').onclick = sync;
+
+            document.getElementById('save-weights-btn').onclick = async () => {
+                const newWeights = {};
+                document.querySelectorAll('#weight-inputs-container input').forEach(inp => {
+                    newWeights[inp.dataset.key] = parseInt(inp.value) || 0;
+                });
+                state.settings.weights = newWeights;
+                
+                await dbPut('userData', { id: 'settings', value: state.settings });
+                if (userDocRef && setDoc) {
+                    setDoc(userDocRef, { settings_weights: newWeights }, { merge: true });
+                }
+                
+                renderHero();
+                showToast('✅ Weights Updated!');
+                document.getElementById('settings-panel').classList.add('hidden');
+            };
             
-            // Validate weights on input
-            const weightInputs = document.querySelectorAll('.weight-input');
-            weightInputs.forEach(input => input.addEventListener('input', validateWeights));
-            validateWeights(); // Initial check
+            // Info Modal
+            document.getElementById('weighted-info-btn').onclick = () => {
+                const list = document.getElementById('info-weights-list');
+                list.innerHTML = '';
+                const data = calculateGlobalComposite();
+                
+                Object.values(data.breakdown).sort((a,b) => b.weight - a.weight).forEach(item => {
+                   const row = el('div', 'grid grid-cols-3 p-2 border-b border-secondary/50 text-xs');
+                   row.innerHTML = `
+                        <div class="col-span-2 font-medium">${item.name}</div>
+                        <div class="text-right font-mono ${item.weight > 0 ? 'text-blue-500' : 'text-muted'}">${item.weight}%</div>
+                   `;
+                   list.appendChild(row);
+                });
+                
+                document.getElementById('info-modal-overlay').classList.remove('hidden');
+            };
+            
+            const closeInfo = () => document.getElementById('info-modal-overlay').classList.add('hidden');
+            document.getElementById('info-modal-close').onclick = closeInfo;
+            document.getElementById('info-modal-close-btn').onclick = closeInfo;
+            document.getElementById('info-modal-overlay').onclick = (e) => { if(e.target === e.currentTarget) closeInfo(); };
+
+            // Note Modal
+            document.getElementById('note-modal-cancel').onclick = () => document.getElementById('note-modal-overlay').classList.add('hidden');
+            document.getElementById('note-modal-save').onclick = async () => {
+                if (currentNoteKey) {
+                    const val = document.getElementById('note-textarea').value;
+                    const noteKey = `note_${currentNoteKey}`;
+                    state.userData[noteKey] = val;
+                    await queueWrite(noteKey, val);
+                    renderSyllabus(); // Re-render to show note icon
+                }
+                document.getElementById('note-modal-overlay').classList.add('hidden');
+            };
+            document.getElementById('note-modal-clear').onclick = () => document.getElementById('note-textarea').value = '';
+            
+            // Data Export/Import Handlers
+            document.getElementById('export-json-btn').onclick = () => {
+                const blob = new Blob([JSON.stringify(state.userData, null, 2)], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `as_backup_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('✅ Exported');
+            };
+            
+            document.getElementById('import-data-btn').onclick = () => document.getElementById('import-file-input').click();
+            document.getElementById('import-file-input').onchange = (e) => {
+                const file = e.target.files[0];
+                if(!file) return;
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        state.userData = { ...state.userData, ...data };
+                        await dbPut('userData', { id: 'main', value: state.userData });
+                        renderSyllabus(); renderHero(); renderSubjectSelector();
+                        showToast('✅ Imported');
+                    } catch(err) { alert('Invalid JSON'); }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            };
         }
         
         function validateWeights() {
@@ -827,28 +1019,25 @@
                 .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
             const disp = document.getElementById('weight-total-display');
             disp.textContent = total + '%';
-            disp.className = total === 100 ? 'text-green-500 font-bold' : 'text-red-500 font-bold';
-            document.getElementById('save-weights-btn').disabled = total !== 100;
-            document.getElementById('save-weights-btn').style.opacity = total === 100 ? '1' : '0.5';
+            disp.className = total === 100 
+                ? 'text-green-500 font-bold bg-green-500/10 px-2 py-0.5 rounded text-xs' 
+                : 'text-red-500 font-bold bg-red-500/10 px-2 py-0.5 rounded text-xs';
+            
+            const btn = document.getElementById('save-weights-btn');
+            btn.disabled = total !== 100;
+            btn.style.opacity = total === 100 ? '1' : '0.5';
         }
-        
-        async function saveWeights() {
-            const w = {
-                mqb: parseInt(document.getElementById('w-mqb').value) || 0,
-                rev1: parseInt(document.getElementById('w-rev1').value) || 0,
-                class: parseInt(document.getElementById('w-class').value) || 0,
-                revClass: parseInt(document.getElementById('w-revcls').value) || 0
-            };
-            state.settings.weights = w;
-            
-            // Persist
-            await dbPut('userData', { id: 'settings', value: state.settings });
-            if (userDocRef) {
-                setDoc(userDocRef, { settings_weights: w }, { merge: true });
-            }
-            
-            renderHero();
-            alert('Weights updated!');
+
+        function showToast(msg) {
+            const c = document.getElementById('toast-container');
+            const t = el('div', 'bg-card-solid border border-primary text-primary px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300');
+            t.innerHTML = `<span>${msg}</span>`;
+            c.appendChild(t);
+            requestAnimationFrame(() => t.classList.remove('translate-y-10', 'opacity-0'));
+            setTimeout(() => {
+                t.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => t.remove(), 300);
+            }, 3000);
         }
 
         function applyTheme(t) {
@@ -868,34 +1057,22 @@
                 const h = Math.floor((diff % 86400000) / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);
                 el.innerHTML = `
-                    <div class="flex flex-col items-center"><div class="countdown-digit">${d}</div><div class="text-[10px] mt-1 uppercase font-bold text-muted">Days</div></div>
-                    <div class="flex flex-col items-center"><div class="countdown-digit">${h}</div><div class="text-[10px] mt-1 uppercase font-bold text-muted">Hrs</div></div>
-                    <div class="flex flex-col items-center"><div class="countdown-digit">${m}</div><div class="text-[10px] mt-1 uppercase font-bold text-muted">Mins</div></div>
+                    <div class="flex flex-col items-center"><div class="countdown-digit">${d}</div><div class="text-[9px] mt-1 uppercase font-bold text-muted tracking-wider">Days</div></div>
+                    <div class="flex flex-col items-center"><div class="countdown-digit">${h}</div><div class="text-[9px] mt-1 uppercase font-bold text-muted tracking-wider">Hrs</div></div>
+                    <div class="flex flex-col items-center"><div class="countdown-digit">${m}</div><div class="text-[9px] mt-1 uppercase font-bold text-muted tracking-wider">Mins</div></div>
                 `;
             }, 1000);
         }
         
-        // Note Modal Logic
-        let currentNoteKey = null;
+        // Note Modal Open
         function openNoteModal(key) {
             currentNoteKey = key;
             const val = state.userData[`note_${key}`] || '';
             document.getElementById('note-textarea').value = val;
             document.getElementById('note-modal-overlay').classList.remove('hidden');
+            document.getElementById('note-modal-subtitle').textContent = key.replace('s_', 'ID: ').replace(/_/g, ' ');
         }
-        document.getElementById('note-modal-cancel').onclick = () => document.getElementById('note-modal-overlay').classList.add('hidden');
-        document.getElementById('note-modal-save').onclick = async () => {
-            if (currentNoteKey) {
-                const val = document.getElementById('note-textarea').value;
-                state.userData[`note_${currentNoteKey}`] = val;
-                await queueWrite(`note_${currentNoteKey}`, val);
-                renderSyllabus(); // Update icon
-            }
-            document.getElementById('note-modal-overlay').classList.add('hidden');
-        };
-        document.getElementById('note-modal-clear').onclick = () => document.getElementById('note-textarea').value = '';
 
-        // Start
         init();
     </script>
 </body>
