@@ -1,178 +1,902 @@
-<!doctype html>
-<html lang="bn">
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Adnan — Ad-Reduced Video Player</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="google" content="notranslate" />
+    <meta name="theme-color" id="theme-color-meta" content="#0f172a" />
+    <title>AS Study Dashboard v19.1 (ReLogic)</title> 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-main: #f0f4f8; --bg-card: #ffffff; --bg-header: rgba(255, 255, 255, 0.8);
+            --text-primary: #1e293b; --text-secondary: #334155; --text-muted: #64748b;
+            --border-primary: #e2e8f0; --border-secondary: #f1f5f9;
+            --progress-track: #e2e8f0;
+            --accent: #3b82f6;
+        }
+        html[data-theme="dark"] {
+            --bg-main: #020617; --bg-card: #0f172a; --bg-header: rgba(15, 23, 42, 0.8);
+            --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+            --border-primary: #1e293b; --border-secondary: #334155;
+            --progress-track: #1e293b;
+            --accent: #60a5fa;
+        }
+        
+        html, body { height: 100%; margin: 0; background: var(--bg-main); color: var(--text-primary); font-family: 'Inter', 'Noto Sans Bengali', sans-serif; -webkit-font-smoothing: antialiased; font-size: 14px; transition: background-color 0.3s ease, color 0.3s ease; }
+        
+        /* --- Glassmorphism & Cards --- */
+        .card { 
+            background: var(--bg-card); 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+            border: 1px solid var(--border-primary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        html[data-theme="dark"] .card {
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
 
-  <!-- Basic CSP: সীমিত সোর্সগুলোই লোড হবে (iframe ভিতরের কন্টেন্টকে পুরোপুরি নিয়ন্ত্রণ করা যায় না) -->
-  <meta http-equiv="Content-Security-Policy"
-        content="
-          default-src 'self';
-          script-src 'self' https://www.youtube-nocookie.com https://www.youtube.com 'unsafe-inline' 'unsafe-eval';
-          connect-src 'self' https://www.youtube-nocookie.com https://www.youtube.com;
-          img-src 'self' data: https://i.ytimg.com;
-          frame-src https://www.youtube-nocookie.com https://www.youtube.com;
-          style-src 'self' 'unsafe-inline';
-        ">
+        .header-glass {
+            background: var(--bg-header);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-primary);
+        }
 
-  <style>
-    :root{
-      --bg:#071018; --card:#0f1720; --accent:#35e6b6; --muted:#9aa7b2; --text:#e6f6f3;
-      --r:12px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(180deg,#04121a 0%, #071018 100%); color:var(--text);
-      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif; padding:24px;
-    }
-    .wrap{width:100%; max-width:920px;}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
-      border-radius:var(--r); padding:20px; box-shadow:0 10px 40px rgba(2,6,23,0.6);}
-    h1{margin:0 0 6px 0; color:var(--accent); font-size:20px;}
-    p.lead{margin:0 0 14px 0; color:var(--muted); font-size:13px;}
-    .controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px;}
-    input[type="text"]{
-      flex:1; min-width:220px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
-      background:#071a22; color:var(--text); outline:none;
-    }
-    button{
-      padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:600;
-      background:var(--accent); color:#022; transition:transform .12s ease;
-    }
-    button:active{transform:translateY(1px)}
-    .note{font-size:12px;color:var(--muted); margin-top:10px;}
-    /* responsive iframe container */
-    .player-wrap{margin-top:10px; border-radius:12px; overflow:hidden; background:#000;}
-    .player-wrap .frame{
-      width:100%; aspect-ratio:16/9; border:0; display:block;
-    }
-    .small-help{font-size:12px;color:var(--muted); margin-top:8px;}
-    .warn{color:#ff7b7b; font-weight:600; margin-top:8px;}
-  </style>
+        /* --- Progress Bars --- */
+        .progress-bar-container { background-color: var(--progress-track); border-radius: 9999px; overflow: hidden; height: 0.6rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        .progress-bar { height: 100%; border-radius: 9999px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .progress-bar::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+        /* Gradients */
+        .pb-gradient-mint { background: linear-gradient(90deg, #34d399, #10b981); }
+        .pb-gradient-sky { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+        .pb-gradient-peach { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .pb-gradient-lav { background: linear-gradient(90deg, #a78bfa, #8b5cf6); }
+        .pb-gradient-rose { background: linear-gradient(90deg, #fb7185, #f43f5e); }
+        .pb-gradient-indigo { background: linear-gradient(90deg, #818cf8, #6366f1); }
+
+        /* --- Subject Selector --- */
+        .subject-selector-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .subject-progress-btn { 
+            display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; 
+            padding: 16px 10px; border-radius: 16px; 
+            border: 1px solid var(--border-primary); background: var(--bg-card);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .subject-progress-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .subject-progress-btn.active { 
+            border-color: var(--accent); 
+            background: rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 2px var(--accent); 
+        }
+        html[data-theme="dark"] .subject-progress-btn.active { background: rgba(59, 130, 246, 0.15); }
+        .subject-progress-svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+        .subject-progress-svg circle { transition: stroke-dashoffset 0.5s ease-out; }
+
+        /* --- Tasks --- */
+        .task-status-btn { 
+            --fill: 0%; position: relative; display:inline-flex; align-items:center; justify-content:center; 
+            width: 32px; height: 32px; border-radius: 8px; 
+            border: 1px solid var(--border-secondary); background: var(--bg-main); 
+            cursor: pointer; overflow: hidden; z-index: 1; transition: all 0.2s; 
+            color: var(--text-secondary); font-size: 11px; font-weight: 700;
+        }
+        .task-status-btn::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: var(--fill, 0%); background: rgba(56, 189, 248, 0.3); z-index: -1; transition: width .2s ease-out; }
+        .task-status-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .task-status-btn.done { background: #10b981; border-color: #059669; color: white !important; }
+        .task-status-btn.wont { background: #ef4444; border-color: #b91c1c; color: white !important; }
+        
+        /* --- Settings Panel --- */
+        #settings-panel { 
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+        .settings-group-title {
+            font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted);
+            padding: 16px 16px 8px; font-weight: 700;
+        }
+
+        /* --- Animations & Misc --- */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; transition: background-color 0.3s; }
+        .modal-overlay { backdrop-filter: blur(8px); background: rgba(0,0,0,0.6); }
+        
+        /* Countdown */
+        .countdown-digit { 
+            background: var(--bg-main); border: 1px solid var(--border-primary);
+            border-radius: 8px; padding: 8px 12px; font-family: 'Inter', monospace; font-weight: 700; font-size: 1.5rem;
+            min-width: 48px; text-align: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        html[data-theme="dark"] .countdown-digit { box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        
+        /* Weight Input */
+        .weight-input {
+            background: var(--bg-main); border: 1px solid var(--border-primary);
+            color: var(--text-primary); padding: 4px 8px; border-radius: 6px;
+            width: 50px; text-align: center; font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (min-width: 1024px) {
+            .main-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+            .subject-selector-container { display: flex; flex-direction: column; gap: 16px; }
+            .subject-progress-btn { flex-direction: row; padding: 12px 16px; }
+            .subject-progress-btn div.relative { margin-right: 8px; }
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Adnan — Ad-Reduced Video Player</h1>
-      <p class="lead">ভিডিও চালাতে কেবল YouTube ভিডিও **ID** দিন (উদাহরণ: <code>dQw4w9WgXcQ</code>) — পেজ URL-এ কোনো “youtube” শব্দ থাকবে না।</p>
-
-      <div class="controls">
-        <input id="vidInput" type="text" placeholder="ভিডিও আইডি লিখুন — উদাহরণ: dQw4w9WgXcQ" aria-label="Video ID">
-        <button id="playBtn">▶ প্লে</button>
-        <button id="muteBtn" title="Mute/unmute (effort to reduce autoplay sound)">🔈 mute</button>
-      </div>
-
-      <div class="player-wrap" id="playerWrap">
-        <!-- iframe src will be set dynamically by JS (minimize static exposure of 'youtube' in source) -->
-        <iframe id="ytFrame" class="frame"
-                sandbox="allow-scripts allow-forms allow-popups allow-presentation"
-                allow="autoplay; encrypted-media; fullscreen"
-                srcdoc="<p style='color:#ddd;padding:18px;font-family:system-ui'>ভিডিও লোড করতে প্লে ক্লিক করুন...</p>">
-        </iframe>
-      </div>
-
-      <div class="small-help">Tech-tricks used: privacy-enhanced domain (youtube-nocookie), iframe sandboxing, CSP limits. </div>
-      <div class="note">Tip: যদি ব্লকার নেটওয়ার্ক-লেভেলে youtube ডোমেইন শনাক্ত করে, তবে iframe-এর ভিডিও লোড হবে না — সে ক্ষেত্রে offline MP4 ব্যবহার করো।</div>
-      <div class="warn" id="warnMsg" aria-live="polite"></div>
+    <div id="offline-banner" style="display:none;" class="bg-rose-600 text-white text-xs font-bold py-2 text-center fixed top-0 w-full z-50 shadow-lg">
+        ⚠️ অফলাইন মোড: ইন্টারনেট সংযোগ নেই। পরিবর্তনগুলো সেভ করা হচ্ছে।
     </div>
-  </div>
 
-<script>
-/*
-  Strategy summary (in code):
-  - Use youtube-nocookie.com embed (privacy enhanced) to reduce tracking/ads.
-  - Set iframe.src dynamically (so plain HTML file doesn't contain youtube text until runtime).
-  - Use iframe sandbox WITHOUT allow-same-origin to reduce cookie/access inside iframe (best-effort).
-  - Provide user controls and basic messaging about limits.
-*/
+    <header id="header" class="sticky top-0 z-30 w-full header-glass">
+        <div class="w-full max-w-screen-xl mx-auto flex justify-between items-center py-3 px-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">AS</div>
+                <h1 class="text-lg font-bold tracking-tight">Study Dashboard <span class="text-xs font-normal text-muted px-2 py-0.5 rounded-full border border-primary bg-main">v19.1</span></h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-xs font-medium text-muted bg-card px-3 py-1.5 rounded-full border border-primary shadow-sm">
+                    <div id="connection-status" class="status-dot bg-gray-400"></div>
+                    <span id="connection-text">Offline</span>
+                </div>
+                <button id="settings-btn" class="p-2 rounded-full hover:bg-border-secondary text-muted hover:text-primary transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0l-.1.41-1.15.3a1.75 1.75 0 00-2.3 2.3l.3 1.15-.41.1c-1.56.38-1.56 2.6 0 2.98l.41.1-.3 1.15a1.75 1.75 0 002.3 2.3l1.15-.3.1.41c.38 1.56 2.6 1.56 2.98 0l.1-.41 1.15.3c1.02.28 2.03-.2 2.3-1.15l.3-1.15.41-.1c1.56-.38 1.56-2.6 0-2.98l-.41-.1.3-1.15c.28-1.02-.2-2.03-1.15-2.3l-1.15-.3-.1-.41zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+        </div>
+    </header>
 
-(function(){
-  const vidInput = document.getElementById('vidInput');
-  const playBtn = document.getElementById('playBtn');
-  const muteBtn = document.getElementById('muteBtn');
-  const frame = document.getElementById('ytFrame');
-  const warn = document.getElementById('warnMsg');
-  let muted = false;
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="hidden fixed top-16 right-4 w-80 max-w-[90vw] rounded-2xl z-40 overflow-hidden">
+        <div class="max-h-[80vh] overflow-y-auto">
+            <div class="settings-group-title">Preferences</div>
+            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-main transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg">🔊</span>
+                    <div><div class="font-semibold text-sm">Sound Effects</div><div class="text-xs text-muted">Click volume</div></div>
+                </div>
+                <input type="range" id="sound-volume-slider" min="0" max="1" step="0.1" class="w-20 accent-blue-500 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-main transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg">🌓</span>
+                    <div><div class="font-semibold text-sm">Theme</div><div class="text-xs text-muted">Dark/Light mode</div></div>
+                </div>
+                <button id="theme-toggle-btn" class="text-xs bg-card border border-primary px-3 py-1.5 rounded-lg font-medium hover:bg-border-secondary transition-colors">Toggle</button>
+            </div>
 
-  function setWarn(text){
-    warn.textContent = text || '';
-  }
+            <div class="settings-group-title">Data Management</div>
+            <div class="px-4 py-3 border-b border-secondary flex justify-between items-center hover:bg-main transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="text-lg">🔄</span>
+                    <div><div class="font-semibold text-sm">Sync Queue</div><div class="text-xs text-muted" id="sync-status-text">0 pending</div></div>
+                </div>
+                <button id="sync-queue-btn" class="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100 transition-colors relative">View Queue</button>
+            </div>
+            <div class="px-4 py-3 border-b border-secondary flex gap-2 justify-end">
+                <button id="export-json-btn" class="text-xs flex-1 bg-card border border-primary py-1.5 rounded hover:bg-border-secondary">Export JSON</button>
+                <button id="import-data-btn" class="text-xs flex-1 bg-card border border-primary py-1.5 rounded hover:bg-border-secondary">Import</button>
+            </div>
 
-  function buildEmbedUrl(id){
-    // Using privacy-enhanced domain (youtube-nocookie.com) and player params to reduce ads/tracking.
-    // playerVars: modestbranding=1, rel=0, iv_load_policy=3 (no annotations), playsinline=1
-    // enablejsapi=1 allows future control; origin param helps but avoid exposing your own origin with youtube keyword concerns.
-    const base = "https://www.youtube-nocookie.com";
-    const path = "/embed/" + encodeURIComponent(id);
-    const qs = [
-      "rel=0",
-      "modestbranding=1",
-      "iv_load_policy=3",
-      "playsinline=1",
-      "autoplay=1",
-      "enablejsapi=1"
-    ].join("&");
-    return base + path + "?" + qs;
-  }
+            <div class="settings-group-title flex justify-between items-center">
+                <span>Weighted Progress Config</span>
+                <span id="weight-total-display" class="text-green-500 font-bold">100%</span>
+            </div>
+            <div class="px-4 py-3 bg-main/50">
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="flex justify-between items-center"><span>MQB</span><input type="number" id="w-mqb" class="weight-input" value="60"></div>
+                    <div class="flex justify-between items-center"><span>Rev 1</span><input type="number" id="w-rev1" class="weight-input" value="20"></div>
+                    <div class="flex justify-between items-center"><span>Class</span><input type="number" id="w-class" class="weight-input" value="10"></div>
+                    <div class="flex justify-between items-center"><span>Rev Cls</span><input type="number" id="w-revcls" class="weight-input" value="10"></div>
+                </div>
+                <button id="save-weights-btn" class="w-full mt-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition-colors">Update Weights</button>
+            </div>
+        </div>
+    </div>
+    
+    <main id="app-container" class="container max-w-screen-xl mx-auto py-6 px-4">
+        <div id="loading-indicator" class="flex flex-col items-center justify-center py-20">
+            <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <div class="text-muted font-medium animate-pulse">Loading Dashboard...</div>
+        </div>
 
-  function isValidId(id){
-    // simple validation: common YouTube id characters (letters, numbers, - _)
-    return /^[A-Za-z0-9_-]{7,20}$/.test(id);
-  }
+        <div id="main-content-grid" class="flex flex-col gap-6" style="display: none;">
+            
+            <!-- Hero Section: High Level Metrics -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Weighted Progress (Main) -->
+                <div class="card md:col-span-2 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">📊</div>
+                    <div class="relative z-10">
+                        <h2 class="text-sm font-bold uppercase tracking-wider text-muted mb-4 flex justify-between">
+                            Overall Weighted Progress
+                            <button class="info-btn w-5 h-5 rounded-full border border-primary flex items-center justify-center text-xs hover:bg-main" id="weighted-info-btn">?</button>
+                        </h2>
+                        <div class="flex items-end gap-4 mb-2">
+                            <span class="text-4xl font-bold text-primary" id="hero-composite-val">0.0%</span>
+                            <span class="text-sm text-muted mb-2">Total Completion</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div id="hero-composite-bar" class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 mt-4">
+                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
+                                <div class="text-[10px] text-muted font-bold">MQB</div>
+                                <div class="text-sm font-bold text-amber-500" id="hero-mqb-val">0%</div>
+                             </div>
+                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
+                                <div class="text-[10px] text-muted font-bold">REV 1</div>
+                                <div class="text-sm font-bold text-sky-500" id="hero-rev1-val">0%</div>
+                             </div>
+                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
+                                <div class="text-[10px] text-muted font-bold">CLASS</div>
+                                <div class="text-sm font-bold text-emerald-500" id="hero-class-val">0%</div>
+                             </div>
+                             <div class="text-center p-2 rounded-lg bg-main border border-primary">
+                                <div class="text-[10px] text-muted font-bold">REV CLS</div>
+                                <div class="text-sm font-bold text-purple-500" id="hero-revcls-val">0%</div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
 
-  playBtn.addEventListener('click', function(){
-    setWarn('');
-    const id = vidInput.value.trim();
-    if(!id){
-      setWarn('ভিডিও আইডি দিন। (উদাহরণ: dQw4w9WgXcQ)');
-      return;
-    }
-    if(!isValidId(id)){
-      setWarn('অবৈধ ভিডিও ID। শুধুমাত্র অক্ষর, সংখ্যা, "_" এবং "-" ব্যবহার করুন।');
-      return;
-    }
+                <!-- Streak & Countdown -->
+                <div class="flex flex-col gap-4">
+                    <div class="card flex-1 flex flex-col justify-center items-center bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-900/10 border-orange-200 dark:border-orange-800">
+                        <div class="text-center">
+                            <div class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1">Study Streak</div>
+                            <div class="text-3xl font-black text-orange-600 dark:text-orange-400 flex items-center justify-center gap-2">
+                                <span>🔥</span> <span id="streak-val">0</span> Days
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card flex-1 p-4 flex flex-col justify-center">
+                        <div class="text-xs text-center font-bold text-muted uppercase mb-2">Countdown to Exam</div>
+                        <div id="countdown" class="flex justify-center gap-2">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-    // Build embed URL (contains youtube-nocookie)
-    const embed = buildEmbedUrl(id);
+            <!-- Main Workspace -->
+            <div class="main-grid">
+                <!-- Left Sidebar (Desktop) / Top (Mobile) -->
+                <aside class="flex flex-col gap-4">
+                    <div class="card">
+                        <h3 class="font-bold text-sm mb-4 text-muted uppercase">Select Subject</h3>
+                        <div id="subject-selector" class="subject-selector-container">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+                    
+                    <!-- Specific Subject Stats -->
+                    <div class="card">
+                        <h3 class="font-bold text-sm mb-4 text-muted uppercase">Subject Performance</h3>
+                        <div id="selected-subject-summary" class="flex flex-col gap-4">
+                            <!-- JS Injected -->
+                        </div>
+                    </div>
+                </aside>
 
-    // Set iframe.src dynamically. iframe has sandbox but allows scripts.
-    // Because sandbox lacks allow-same-origin, the iframe will run in a unique origin, which reduces cookie access for the youtube player.
-    // Note: some iframe features may be limited; this is a trade-off to reduce ads/tracking.
-    frame.src = embed;
+                <!-- Right Content -->
+                <div class="flex flex-col gap-6">
+                    <!-- Syllabus Table -->
+                    <section id="syllabus-container" class="flex flex-col gap-4">
+                        <!-- JS Injected Details/Summary -->
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    // Inform user about possible outcomes
-    setTimeout(function(){
-      // quick check: if frame fails to load (CSP or network block), warn user after a small delay
-      // We can't perfectly detect cross-origin iframe load failures via JS; offer a friendly message.
-      setWarn('ভিডিও লোড হচ্ছে — যদি কিছু না দেখেন, আপনার ব্লকার নেটওয়ার্ক-লেভেলে youtube ব্লক করছে।');
-    }, 600);
-  });
+    <!-- Modals -->
+    <div id="info-modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay p-4">
+        <div class="bg-card w-full max-w-md rounded-2xl p-6 shadow-2xl border border-primary transform transition-all scale-100">
+            <h3 id="info-modal-title" class="text-xl font-bold mb-2">Info</h3>
+            <p id="info-modal-desc" class="text-muted text-sm mb-4"></p>
+            <div class="bg-main p-3 rounded-lg border border-primary mb-4">
+                <div class="text-xs font-bold text-muted mb-2 uppercase">Includes Items:</div>
+                <ul id="info-modal-items" class="text-sm space-y-1 pl-2"></ul>
+            </div>
+            <button id="info-modal-close" class="w-full py-2.5 bg-primary text-primary-foreground bg-slate-800 text-white rounded-xl font-medium hover:bg-slate-700 transition-colors">Close</button>
+        </div>
+    </div>
 
-  muteBtn.addEventListener('click', function(){
-    muted = !muted;
-    try{
-      // Try to postMessage to player to mute (works if player API accessible)
-      frame.contentWindow.postMessage(JSON.stringify({
-        event: "command",
-        func: muted ? "mute" : "unMute",
-        args: []
-      }), "*");
-    }catch(e){
-      // silent
-    }
-    muteBtn.textContent = muted ? "🔇 muted" : "🔈 mute";
-  });
+    <div id="note-modal-overlay" class="fixed inset-0 z-50 hidden flex items-center justify-center modal-overlay p-4">
+        <div class="bg-card w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-primary">
+            <h3 id="note-modal-title" class="text-lg font-bold mb-3">Edit Note</h3>
+            <textarea id="note-textarea" class="w-full h-32 bg-main border border-primary rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow resize-none" placeholder="Write your study notes here..."></textarea>
+            <div class="flex gap-3 mt-4">
+                <button id="note-modal-clear" class="px-4 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors">Delete</button>
+                <div class="flex-grow"></div>
+                <button id="note-modal-cancel" class="px-4 py-2 text-sm text-muted hover:text-primary transition-colors">Cancel</button>
+                <button id="note-modal-save" class="px-6 py-2 text-sm bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all">Save Note</button>
+            </div>
+        </div>
+    </div>
 
-  // Optional: allow pressing Enter to play
-  vidInput.addEventListener('keydown', function(e){
-    if(e.key === 'Enter') playBtn.click();
-  });
+    <div id="import-file-input-container" class="hidden"><input type="file" id="import-file-input" accept=".json"></div>
+    <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-max max-w-[90vw]"></div>
 
-  // Accessibility: prefills sample id if none
-  if(!vidInput.value) vidInput.placeholder = "উদাহরণ: dQw4w9WgXcQ";
-})();
-</script>
+    <script type="module">
+        // Firebase Config
+        const FIRESTORE_USER_ID = 'as19';
+        const firebaseConfig = {"apiKey":"AIzaSyDTLhIkrW9qk6KPT_gTDibIiJeVwWYTowk","authDomain":"my-study-dashboard.firebaseapp.com","projectId":"my-study-dashboard","storageBucket":"my-study-dashboard.appspot.com","messagingSenderId":"66307909031","appId":"1:66307909031:web:9e724a43c8c11a0ef80282"};
+        
+        // Globals for Firebase
+        let app, db, userDocRef;
+        let initializeApp, getFirestore, doc, onSnapshot, setDoc;
+
+        // --- Syllabus Config ---
+        const syllabusData = { 
+            biology: { name: "Biology", icon: "🧬", chapters: [ 
+                { id: 1, name: "Cell & Structure", paper: 1 }, { id: 2, name: "Cell Division", paper: 1 }, { id: 3, name: "Cell Chemistry", paper: 1 }, { id: 4, name: "Microorganisms", paper: 1 }, { id: 5, name: "Algae & Fungi", paper: 1 }, { id: 6, name: "Bryophyta & Pteridophyta", paper: 1 }, { id: 7, name: "Gymnosperms & Angiosperms", paper: 1 }, { id: 8, name: "Tissue System", paper: 1 }, { id: 9, name: "Plant Physiology", paper: 1 }, { id: 10, name: "Plant Reproduction", paper: 1 }, { id: 11, name: "Biotechnology", paper: 1 }, { id: 12, name: "Environment & Conservation", paper: 1 }, 
+                { id: 13, name: "Animal Diversity", paper: 2 }, { id: 14, name: "Hydra", paper: 2 }, { id: 15, name: "Grasshopper", paper: 2 }, { id: 16, name: "Rui Fish", paper: 2 }, { id: 17, name: "Digestion", paper: 2 }, { id: 18, name: "Blood Circulation", paper: 2 }, { id: 19, name: "Respiration", paper: 2 }, { id: 20, name: "Excretion", paper: 2 }, { id: 21, name: "Locomotion", paper: 2 }, { id: 22, name: "Coordination", paper: 2 }, { id: 23, name: "Human Continuity", paper: 2 }, { id: 24, name: "Immunity", paper: 2 }, { id: 25, name: "Genetics & Evolution", paper: 2 }, { id: 26, name: "Animal Behavior", paper: 2 } 
+            ] }, 
+            chemistry: { name: "Chemistry", icon: "⚗️", chapters: [ 
+                { id: 1, name: "Lab Safety", paper: 1 }, { id: 2, name: "Qualitative Chem", paper: 1 }, { id: 3, name: "Periodic Properties", paper: 1 }, { id: 4, name: "Chemical Changes", paper: 1 }, { id: 5, name: "Applied Chem", paper: 1 }, 
+                { id: 6, name: "Environmental Chem", paper: 2 }, { id: 7, name: "Organic Chem", paper: 2 }, { id: 8, name: "Quantitative Chem", paper: 2 }, { id: 9, name: "Electrochemistry", paper: 2 }, { id: 10, name: "Economic Chem", paper: 2 } 
+            ] }, 
+            physics: { name: "Physics", icon: "⚛️", chapters: [ 
+                { id: 1, name: "Physical World", paper: 1 }, { id: 2, name: "Vector", paper: 1 }, { id: 3, name: "Dynamics", paper: 1 }, { id: 4, name: "Newtonian Mech", paper: 1 }, { id: 5, name: "Work, Power, Energy", paper: 1 }, { id: 6, name: "Gravity", paper: 1 }, { id: 7, name: "Structural Properties", paper: 1 }, { id: 8, name: "Periodic Motion", paper: 1 }, { id: 9, name: "Waves", paper: 1 }, { id: 10, name: "Ideal Gas", paper: 1 }, 
+                { id: 11, name: "Thermodynamics", paper: 2 }, { id: 12, name: "Electrostatics", paper: 2 }, { id: 13, name: "Current Electricity", paper: 2 }, { id: 14, name: "Magnetic Effects", paper: 2 }, { id: 15, name: "EMI", paper: 2 }, { id: 16, name: "Geometrical Optics", paper: 2 }, { id: 17, name: "Physical Optics", paper: 2 }, { id: 18, name: "Modern Physics", paper: 2 }, { id: 19, name: "Atomic Model", paper: 2 }, { id: 20, name: "Semiconductors", paper: 2 }, { id: 21, name: "Astronomy", paper: 2 } 
+            ] } 
+        };
+        const trackableItems = ["Main Book", "Class", "Rev Class", "Meditrics", "MQB", "Retina QB", "SF Exam", "Daily Exam", "Weekly Exam", "Campus Exam", "Rev 1", "Rev 2"];
+        
+        // --- State Management ---
+        const state = { 
+            userData: {}, 
+            activeSubject: 'biology', 
+            syllabusOpenState: {}, 
+            settings: { 
+                theme: 'dark', 
+                soundVolume: 0.3, 
+                weights: { mqb: 60, rev1: 20, class: 10, revClass: 10 } // Default weights
+            } 
+        };
+        
+        // --- Database (IndexedDB) Wrapper ---
+        let idb;
+        const DB_NAME = 'AS_Study_DB_v1';
+        function openDB() { return new Promise((resolve, reject) => { const r = indexedDB.open(DB_NAME, 1); r.onerror = () => reject(r.error); r.onsuccess = () => { idb = r.result; resolve(idb); }; r.onupgradeneeded = (e) => { const db = e.target.result; if (!db.objectStoreNames.contains('userData')) db.createObjectStore('userData', { keyPath: 'id' }); if (!db.objectStoreNames.contains('pendingWrites')) db.createObjectStore('pendingWrites', { keyPath: 'key' }); }; }); }
+        async function dbGet(store, key) { if (!idb) return null; return new Promise(r => { const tx = idb.transaction(store, 'readonly').objectStore(store).get(key); tx.onsuccess = () => r(tx.result); tx.onerror = () => r(null); }); }
+        async function dbPut(store, data) { if (!idb) return; return new Promise((resolve, reject) => { const tx = idb.transaction(store, 'readwrite'); tx.oncomplete = () => resolve(); tx.onerror = (e) => reject(tx.error); tx.objectStore(store).put(data); }); }
+        async function dbGetAll(store) { if (!idb) return []; return new Promise(r => { const tx = idb.transaction(store, 'readonly').objectStore(store).getAll(); tx.onsuccess = () => r(tx.result); tx.onerror = () => r([]); }); }
+        async function dbClear(store) { if (!idb) return; return new Promise((resolve, reject) => { const tx = idb.transaction(store, 'readwrite'); tx.oncomplete = resolve; tx.onerror = reject; tx.objectStore(store).clear(); }); }
+
+        // --- Core Logic ---
+        const getPercent = (status) => (status >= 0 && status <= 5) ? status * 20 : 0;
+        const normalize = (raw) => raw <= 0 ? 0 : Math.min(100, (raw / 80) * 100);
+
+        function calculateProgress(subjectKey, itemNames) {
+            const subject = syllabusData[subjectKey];
+            if (!subject) return { overall: 0, p1: 0, p2: 0 };
+            
+            // Use set for O(1) lookup
+            const targetIndices = new Set(itemNames.map(n => trackableItems.indexOf(n)).filter(i => i !== -1));
+            
+            // Special Logic Handling
+            const mainBookIdx = trackableItems.indexOf("Main Book");
+            const meditricsIdx = trackableItems.indexOf("Meditrics");
+            const isPhysics = subjectKey === 'physics';
+            const useMaxLogic = targetIndices.has(mainBookIdx) && targetIndices.has(meditricsIdx);
+
+            let p1Total = 0, p1Count = 0, p2Total = 0, p2Count = 0;
+
+            subject.chapters.forEach(ch => {
+                let chapterSum = 0;
+                let validItemCount = 0;
+
+                if (useMaxLogic) {
+                    // Special Case: Max(MainBook, Meditrics)
+                    const sMain = getPercent(state.userData[`s_${subjectKey}_${ch.id}_${mainBookIdx}`] ?? 0);
+                    const sMed = getPercent(state.userData[`s_${subjectKey}_${ch.id}_${meditricsIdx}`] ?? 0);
+                    chapterSum += Math.max(sMain, sMed);
+                    validItemCount++;
+                    
+                    targetIndices.forEach(idx => {
+                        if (idx !== mainBookIdx && idx !== meditricsIdx) {
+                            if (isPhysics && idx === mainBookIdx) return; // Skip main book for physics if accidentally included
+                            chapterSum += getPercent(state.userData[`s_${subjectKey}_${ch.id}_${idx}`] ?? 0);
+                            validItemCount++;
+                        }
+                    });
+                } else {
+                    targetIndices.forEach(idx => {
+                        if (isPhysics && idx === mainBookIdx) return;
+                        chapterSum += getPercent(state.userData[`s_${subjectKey}_${ch.id}_${idx}`] ?? 0);
+                        validItemCount++;
+                    });
+                }
+
+                const chAvg = validItemCount > 0 ? normalize(chapterSum / validItemCount) : 0;
+                if (ch.paper === 1) { p1Total += chAvg; p1Count++; } else { p2Total += chAvg; p2Count++; }
+            });
+
+            return {
+                p1: p1Count ? p1Total / p1Count : 0,
+                p2: p2Count ? p2Total / p2Count : 0,
+                overall: (p1Count + p2Count) ? (p1Total + p2Total) / (p1Count + p2Count) : 0
+            };
+        }
+
+        function calculateGlobalComposite() {
+            // Default weights if settings are missing or corrupted
+            const w = state.settings.weights || { mqb: 60, rev1: 20, class: 10, revClass: 10 };
+            const totalWeight = w.mqb + w.rev1 + w.class + w.revClass;
+            // Avoid division by zero
+            if (totalWeight === 0) return { composite: 0, mqbVal: 0, rev1Val: 0, classVal: 0, revClsVal: 0 };
+
+            const subjects = Object.keys(syllabusData);
+            const getAvg = (items) => subjects.reduce((acc, s) => acc + calculateProgress(s, items).overall, 0) / subjects.length;
+
+            const mqbVal = getAvg(["MQB"]);
+            const rev1Val = getAvg(["Rev 1"]);
+            const classVal = getAvg(["Class"]);
+            const revClsVal = getAvg(["Rev Class"]);
+
+            // Weighted Formula
+            const composite = ((mqbVal * w.mqb) + (rev1Val * w.rev1) + (classVal * w.class) + (revClsVal * w.revClass)) / totalWeight;
+
+            return { composite, mqbVal, rev1Val, classVal, revClsVal };
+        }
+
+        function getStreak() {
+            const dates = Object.keys(state.userData)
+                .filter(k => k.startsWith('timestamp_'))
+                .map(k => state.userData[k] ? new Date(state.userData[k]).toLocaleDateString('en-CA') : null)
+                .filter(Boolean)
+                .sort().reverse();
+            const uniqueDates = [...new Set(dates)];
+            if (!uniqueDates.length) return 0;
+            
+            const today = new Date().toLocaleDateString('en-CA');
+            const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('en-CA');
+            
+            if (uniqueDates[0] !== today && uniqueDates[0] !== yesterday) return 0; // Streak broken
+
+            let streak = 1;
+            let current = new Date(uniqueDates[0]);
+            for (let i = 1; i < uniqueDates.length; i++) {
+                current.setDate(current.getDate() - 1);
+                if (uniqueDates[i] === current.toLocaleDateString('en-CA')) streak++;
+                else break;
+            }
+            return streak;
+        }
+
+        // --- UI Rendering ---
+        function el(tag, classes = '', html = '') { const e = document.createElement(tag); if(classes) e.className = classes; if(html) e.innerHTML = html; return e; }
+        
+        function renderHero() {
+            const data = calculateGlobalComposite();
+            const streak = getStreak();
+
+            // Animate Values
+            document.getElementById('hero-composite-val').textContent = data.composite.toFixed(1) + '%';
+            document.getElementById('hero-composite-bar').style.width = data.composite.toFixed(1) + '%';
+            
+            document.getElementById('hero-mqb-val').textContent = data.mqbVal.toFixed(0) + '%';
+            document.getElementById('hero-rev1-val').textContent = data.rev1Val.toFixed(0) + '%';
+            document.getElementById('hero-class-val').textContent = data.classVal.toFixed(0) + '%';
+            document.getElementById('hero-revcls-val').textContent = data.revClsVal.toFixed(0) + '%';
+
+            document.getElementById('streak-val').textContent = streak;
+        }
+
+        function renderSubjectSelector() {
+            const container = document.getElementById('subject-selector');
+            container.innerHTML = '';
+            const colors = ['#10b981', '#f59e0b', '#3b82f6']; // Mint, Amber, Blue
+            
+            Object.entries(syllabusData).forEach(([key, data], idx) => {
+                const prog = calculateProgress(key, ["Main Book", "Class", "Meditrics"]);
+                const color = colors[idx % 3];
+                const isActive = state.activeSubject === key;
+                
+                const btn = el('div', `subject-progress-btn ${isActive ? 'active' : ''}`);
+                btn.onclick = () => { state.activeSubject = key; renderSyllabus(); renderSubjectSummary(); renderSubjectSelector(); };
+                
+                // SVG Circle
+                const r = 22; const c = 2 * Math.PI * r;
+                const offset = c - ((prog.overall / 100) * c);
+                
+                btn.innerHTML = `
+                    <div class="relative w-[52px] h-[52px]">
+                        <svg class="subject-progress-svg w-full h-full"><circle cx="26" cy="26" r="${r}" stroke="var(--progress-track)" stroke-width="4" fill="none"/><circle cx="26" cy="26" r="${r}" stroke="${color}" stroke-width="4" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"/></svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-bold text-xs">${prog.overall.toFixed(0)}%</div>
+                    </div>
+                    <div class="text-center lg:text-left">
+                        <div class="text-xl mb-1">${data.icon}</div>
+                        <div class="font-bold text-sm leading-tight">${data.name}</div>
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function renderSubjectSummary() {
+            const container = document.getElementById('selected-subject-summary');
+            const key = state.activeSubject;
+            
+            const createBar = (label, items, colorClass) => {
+                const p = calculateProgress(key, items);
+                return `
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold mb-1"><span>${label}</span><span>${p.overall.toFixed(1)}%</span></div>
+                        <div class="progress-bar-container h-2"><div class="progress-bar ${colorClass}" style="width: ${p.overall}%"></div></div>
+                        <div class="flex justify-between text-[10px] text-muted mt-1 px-0.5"><span>P1: ${p.p1.toFixed(0)}%</span><span>P2: ${p.p2.toFixed(0)}%</span></div>
+                    </div>
+                `;
+            };
+
+            container.innerHTML = `
+                ${createBar("Main Study", ["Main Book", "Class", "Meditrics"], "pb-gradient-sky")}
+                ${createBar("Exams", ["SF Exam", "Daily Exam", "Weekly Exam"], "pb-gradient-rose")}
+                ${createBar("Question Banks", ["MQB", "Retina QB"], "pb-gradient-peach")}
+            `;
+        }
+
+        function renderSyllabus() {
+            const container = document.getElementById('syllabus-container');
+            container.innerHTML = '';
+            const subject = syllabusData[state.activeSubject];
+            
+            // Group by Paper
+            const p1Chapters = subject.chapters.filter(c => c.paper === 1);
+            const p2Chapters = subject.chapters.filter(c => c.paper === 2);
+
+            [p1Chapters, p2Chapters].forEach((chapters, idx) => {
+                const paperNum = idx + 1;
+                const paperStats = calculateProgress(state.activeSubject, ["Main Book", "Class", "Meditrics"]); // Just for summary
+                const pVal = paperNum === 1 ? paperStats.p1 : paperStats.p2;
+                
+                const details = el('details', 'group bg-card border border-primary rounded-xl overflow-hidden transition-all');
+                const isOpen = state.syllabusOpenState[`${state.activeSubject}-p${paperNum}`] !== false; // Default open
+                if (isOpen) details.open = true;
+                
+                details.ontoggle = (e) => { state.syllabusOpenState[`${state.activeSubject}-p${paperNum}`] = details.open; };
+
+                details.innerHTML = `
+                    <summary class="flex items-center justify-between p-4 cursor-pointer bg-main/50 hover:bg-main transition-colors select-none">
+                        <div class="font-bold text-base">Paper ${paperNum} <span class="text-muted text-sm font-normal ml-2">(${pVal.toFixed(0)}%)</span></div>
+                        <div class="text-xl group-open:rotate-180 transition-transform">⌄</div>
+                    </summary>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                                <tr class="text-xs text-muted border-b border-secondary">
+                                    <th class="p-3 pl-4 w-48 sticky left-0 bg-card z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Chapter</th>
+                                    ${trackableItems.map(t => `<th class="p-3 text-center min-w-[60px]">${t}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm">
+                                ${chapters.map(ch => {
+                                    let tds = trackableItems.map((item, i) => {
+                                        const key = `s_${state.activeSubject}_${ch.id}_${i}`;
+                                        const val = state.userData[key] ?? 0;
+                                        const hasNote = !!state.userData[`note_${key}`];
+                                        
+                                        // Determine button visual state
+                                        let btnClass = 'task-status-btn';
+                                        let fill = 0;
+                                        let label = (val * 20) + '%';
+                                        
+                                        if (val === 5) { btnClass += ' done'; label = '✓'; fill = 100; }
+                                        else if (val === 6) { btnClass += ' wont'; label = '✕'; fill = 0; }
+                                        else { fill = val * 20; }
+
+                                        return `
+                                            <td class="p-2 text-center">
+                                                <div class="flex justify-center gap-1">
+                                                    <button class="${btnClass}" data-key="${key}" style="--fill:${fill}%"><span>${label}</span></button>
+                                                    ${hasNote ? `<button class="text-[10px] w-4 h-4 rounded bg-blue-100 text-blue-600 flex items-center justify-center note-trigger" data-key="${key}">📝</button>` : `<button class="text-[10px] w-4 h-4 rounded hover:bg-secondary text-muted/30 hover:text-muted flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity note-trigger" data-key="${key}">+</button>`}
+                                                </div>
+                                            </td>`;
+                                    }).join('');
+                                    
+                                    return `<tr class="border-b border-secondary hover:bg-main/30 group">
+                                        <td class="p-3 pl-4 font-medium sticky left-0 bg-card z-10 border-r border-secondary">${ch.name}</td>
+                                        ${tds}
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(details);
+            });
+        }
+
+        // --- Interaction Handlers ---
+        async function updateTaskStatus(key) {
+            const current = state.userData[key] ?? 0;
+            const next = (current + 1) % 7;
+            
+            // Optimistic Update
+            state.userData[key] = next;
+            state.userData[`timestamp_${key}`] = new Date().toISOString();
+            
+            // Re-render appropriate parts
+            const btn = document.querySelector(`button[data-key="${key}"]`);
+            if (btn) {
+                // Fast DOM update for responsiveness
+                let fill = 0; let label = (next * 20) + '%';
+                btn.className = 'task-status-btn';
+                if (next === 5) { btn.classList.add('done'); label = '✓'; fill = 100; }
+                else if (next === 6) { btn.classList.add('wont'); label = '✕'; }
+                else { fill = next * 20; }
+                btn.style.setProperty('--fill', `${fill}%`);
+                btn.querySelector('span').textContent = label;
+            }
+
+            // Recalculate summaries
+            renderHero();
+            renderSubjectSelector(); 
+            renderSubjectSummary();
+
+            // Persist
+            await queueWrite(key, next);
+            await queueWrite(`timestamp_${key}`, state.userData[`timestamp_${key}`]);
+            sync();
+        }
+
+        // --- Sync Engine ---
+        async function queueWrite(key, value) {
+            await dbPut('userData', { id: 'main', value: state.userData });
+            await dbPut('pendingWrites', { key, value });
+            updateSyncUI();
+        }
+
+        async function sync() {
+            if (!navigator.onLine) return;
+            const pending = await dbGetAll('pendingWrites');
+            if (!pending.length) return;
+
+            const statusDot = document.getElementById('connection-status');
+            const statusText = document.getElementById('connection-text');
+            statusDot.className = 'status-dot bg-yellow-400 animate-pulse';
+            statusText.textContent = 'Syncing...';
+
+            try {
+                if (app && userDocRef) {
+                    const updateObj = {};
+                    pending.forEach(p => updateObj[p.key] = p.value);
+                    
+                    await setDoc(userDocRef, updateObj, { merge: true });
+                    await dbClear('pendingWrites');
+                    
+                    statusDot.className = 'status-dot bg-green-500';
+                    statusText.textContent = 'Online';
+                    updateSyncUI();
+                }
+            } catch (e) {
+                console.error("Sync failed", e);
+                statusDot.className = 'status-dot bg-red-500';
+                statusText.textContent = 'Error';
+            }
+        }
+
+        async function updateSyncUI() {
+            const pending = await dbGetAll('pendingWrites');
+            const count = pending.length;
+            document.getElementById('sync-status-text').textContent = `${count} pending changes`;
+            if(count > 0) document.getElementById('sync-queue-btn').classList.remove('hidden');
+        }
+
+        async function init() {
+            // 1. Load Local Config & Data
+            try {
+                await openDB();
+                const cached = await dbGet('userData', 'main');
+                if (cached) state.userData = cached.value;
+                
+                // Load Settings
+                const settings = await dbGet('userData', 'settings');
+                if (settings) state.settings = { ...state.settings, ...settings.value };
+                
+                // Apply Theme
+                applyTheme(state.settings.theme);
+                document.getElementById('sound-volume-slider').value = state.settings.soundVolume;
+                
+                // Load Weights into inputs
+                if(state.settings.weights) {
+                    document.getElementById('w-mqb').value = state.settings.weights.mqb;
+                    document.getElementById('w-rev1').value = state.settings.weights.rev1;
+                    document.getElementById('w-class').value = state.settings.weights.class;
+                    document.getElementById('w-revcls').value = state.settings.weights.revClass;
+                }
+
+            } catch (e) { console.error("Local load error", e); }
+
+            // 2. Initial Render
+            renderHero();
+            renderSubjectSelector();
+            renderSubjectSummary();
+            renderSyllabus();
+            startCountdown();
+            document.getElementById('loading-indicator').style.display = 'none';
+            document.getElementById('main-content-grid').style.display = 'flex';
+
+            // 3. Dynamic Firebase Import (Prevents SyntaxError if offline)
+            try {
+                const fbApp = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+                const fbFirestore = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+                
+                initializeApp = fbApp.initializeApp;
+                getFirestore = fbFirestore.getFirestore;
+                doc = fbFirestore.doc;
+                onSnapshot = fbFirestore.onSnapshot;
+                setDoc = fbFirestore.setDoc;
+
+                // Init Firebase
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                userDocRef = doc(db, "users", FIRESTORE_USER_ID);
+                
+                const statusDot = document.getElementById('connection-status');
+                const statusText = document.getElementById('connection-text');
+                statusDot.className = 'status-dot bg-green-500';
+                statusText.textContent = 'Online';
+
+                onSnapshot(userDocRef, (snap) => {
+                    if (snap.exists()) {
+                        const remoteData = snap.data();
+                        state.userData = { ...state.userData, ...remoteData };
+                        if(remoteData.settings_weights) {
+                             state.settings.weights = remoteData.settings_weights;
+                             renderHero();
+                        }
+                        dbPut('userData', { id: 'main', value: state.userData });
+                        renderSyllabus();
+                        renderHero();
+                    }
+                }, (err) => {
+                    console.warn("Offline/Permission Error", err);
+                    statusDot.className = 'status-dot bg-red-500';
+                    statusText.textContent = 'Error';
+                });
+            } catch (e) { 
+                console.warn("Firebase load failed (Offline Mode Active)", e); 
+            }
+
+            // 4. Event Listeners
+            window.addEventListener('online', sync);
+            window.addEventListener('offline', () => document.getElementById('offline-banner').style.display = 'block');
+            
+            document.body.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+
+                // Sound Effect
+                if (state.settings.soundVolume > 0 && (btn.classList.contains('task-status-btn') || btn.classList.contains('subject-progress-btn'))) {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.frequency.value = 800; gain.gain.value = state.settings.soundVolume * 0.1;
+                    osc.start(); osc.stop(ctx.currentTime + 0.05);
+                }
+
+                if (btn.classList.contains('task-status-btn')) {
+                    updateTaskStatus(btn.dataset.key);
+                }
+                if (btn.classList.contains('note-trigger')) {
+                    openNoteModal(btn.dataset.key);
+                }
+            });
+            
+            document.getElementById('settings-btn').onclick = () => document.getElementById('settings-panel').classList.toggle('hidden');
+            document.getElementById('theme-toggle-btn').onclick = () => {
+                const newTheme = state.settings.theme === 'dark' ? 'light' : 'dark';
+                state.settings.theme = newTheme;
+                applyTheme(newTheme);
+                dbPut('userData', { id: 'settings', value: state.settings });
+            };
+            document.getElementById('save-weights-btn').onclick = saveWeights;
+            
+            // Validate weights on input
+            const weightInputs = document.querySelectorAll('.weight-input');
+            weightInputs.forEach(input => input.addEventListener('input', validateWeights));
+            validateWeights(); // Initial check
+        }
+        
+        function validateWeights() {
+            const total = Array.from(document.querySelectorAll('.weight-input'))
+                .reduce((sum, input) => sum + (parseInt(input.value) || 0), 0);
+            const disp = document.getElementById('weight-total-display');
+            disp.textContent = total + '%';
+            disp.className = total === 100 ? 'text-green-500 font-bold' : 'text-red-500 font-bold';
+            document.getElementById('save-weights-btn').disabled = total !== 100;
+            document.getElementById('save-weights-btn').style.opacity = total === 100 ? '1' : '0.5';
+        }
+        
+        async function saveWeights() {
+            const w = {
+                mqb: parseInt(document.getElementById('w-mqb').value) || 0,
+                rev1: parseInt(document.getElementById('w-rev1').value) || 0,
+                class: parseInt(document.getElementById('w-class').value) || 0,
+                revClass: parseInt(document.getElementById('w-revcls').value) || 0
+            };
+            state.settings.weights = w;
+            
+            // Persist
+            await dbPut('userData', { id: 'settings', value: state.settings });
+            if (userDocRef) {
+                setDoc(userDocRef, { settings_weights: w }, { merge: true });
+            }
+            
+            renderHero();
+            alert('Weights updated!');
+        }
+
+        function applyTheme(t) {
+            document.documentElement.setAttribute('data-theme', t);
+            document.getElementById('theme-color-meta').content = t === 'dark' ? '#0f172a' : '#f0f4f8';
+        }
+        
+        let countdownInterval;
+        function startCountdown() {
+            const target = new Date('2025-12-12T00:00:00+06:00');
+            const el = document.getElementById('countdown');
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                const diff = target - new Date();
+                if (diff < 0) { el.innerHTML = "Exam Started"; return; }
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                el.innerHTML = `
+                    <div class="flex flex-col items-center"><div class="countdown-digit">${d}</div><div class="text-[10px] mt-1 uppercase font-bold text-muted">Days</div></div>
+                    <div class="flex flex-col items-center"><div class="countdown-digit">${h}</div><div class="text-[10px] mt-1 uppercase font-bold text-muted">Hrs</div></div>
+                    <div class="flex flex-col items-center"><div class="countdown-digit">${m}</div><div class="text-[10px] mt-1 uppercase font-bold text-muted">Mins</div></div>
+                `;
+            }, 1000);
+        }
+        
+        // Note Modal Logic
+        let currentNoteKey = null;
+        function openNoteModal(key) {
+            currentNoteKey = key;
+            const val = state.userData[`note_${key}`] || '';
+            document.getElementById('note-textarea').value = val;
+            document.getElementById('note-modal-overlay').classList.remove('hidden');
+        }
+        document.getElementById('note-modal-cancel').onclick = () => document.getElementById('note-modal-overlay').classList.add('hidden');
+        document.getElementById('note-modal-save').onclick = async () => {
+            if (currentNoteKey) {
+                const val = document.getElementById('note-textarea').value;
+                state.userData[`note_${currentNoteKey}`] = val;
+                await queueWrite(`note_${currentNoteKey}`, val);
+                renderSyllabus(); // Update icon
+            }
+            document.getElementById('note-modal-overlay').classList.add('hidden');
+        };
+        document.getElementById('note-modal-clear').onclick = () => document.getElementById('note-textarea').value = '';
+
+        // Start
+        init();
+    </script>
 </body>
 </html>
